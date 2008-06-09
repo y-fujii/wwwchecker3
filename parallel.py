@@ -1,7 +1,7 @@
 import sys
+import logging
 import threading
 import Queue
-
 
 
 def run( procs, n ):
@@ -21,8 +21,7 @@ def run( procs, n ):
 				try:
 					proc()
 				except Exception, err:
-					sys.stderr.write( str( err ) + "\n" )
-					sys.stderr.flush()
+					logging.error( str( err ) )
 
 		thr = threading.Thread( target = threadProc )
 		thr.start()
