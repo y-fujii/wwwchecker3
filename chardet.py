@@ -1,5 +1,6 @@
 
 encodings = [
+	"ascii",
 	"utf-8",
 	"euc-jp",
 	"utf-8",
@@ -15,11 +16,16 @@ def detect( text ):
 		try:
 			unicode( text, enc )
 		except UnicodeDecodeError, err:
-			if err.end > best:
+			if err.end > bestScore:
 				bestScore = err.end
 				bestEnc = enc
 		else:
-			bestEnc = enc
-			break
+			return {
+				"encoding": enc,
+				"confidence": 1.0,
+			}
 
-	return { "encoding": bestEnc }
+	return {
+		"encoding": bestEnc,
+		"confidence": float( bestScore ) / float( len( text ) ),
+	}
