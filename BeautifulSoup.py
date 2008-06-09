@@ -1683,8 +1683,13 @@ class UnicodeDammit:
     # meta tags to the corresponding Python codec names. It only covers
     # values that aren't in Python's aliases and can't be determined
     # by the heuristics in find_codec.
-    CHARSET_ALIASES = { "macintosh" : "mac-roman",
-                        "x-sjis" : "shift-jis" }
+    CHARSET_ALIASES = {
+        "macintosh" : "mac-roman",
+        "x-sjis" : "cp932",
+        "shift-jis": "cp932",
+        "shiftjis": "cp932",
+        "sjis": "cp932",
+    }
 
     def __init__(self, markup, overrideEncodings=[],
                  smartQuotesTo='xml'):
@@ -1710,11 +1715,6 @@ class UnicodeDammit:
         if not u and chardet and not isinstance(self.markup, unicode):
             u = self._convertFrom(chardet.detect(self.markup)['encoding'])
 
-        # As a last resort, try utf-8 and windows-1252:
-        if not u:
-            for proposed_encoding in ("utf-8", "windows-1252"):
-                u = self._convertFrom(proposed_encoding)
-                if u: break
         self.unicode = u
         if not u: self.originalEncoding = None
 
@@ -1729,7 +1729,7 @@ class UnicodeDammit:
                 sub = '&%s;' % sub[0]
         return sub
 
-    def _convertFrom(self, proposed):
+    def _convertFrom(self, proposed, errors="strict"):
         proposed = self.find_codec(proposed)
         if not proposed or proposed in self.triedEncodings:
             return None
@@ -1747,17 +1747,17 @@ class UnicodeDammit:
 
         try:
             # print "Trying to convert document to %s" % proposed
-            u = self._toUnicode(markup, proposed)
+            u = self._toUnicode(markup, proposed, errors)
             self.markup = u
             self.originalEncoding = proposed
         except Exception, e:
             # print "That didn't work!"
-            # print e
+            print e
             return None
         #print "Correct encoding: %s" % proposed
         return self.markup
 
-    def _toUnicode(self, data, encoding):
+    def _toUnicode(self, data, encoding, errors):
         '''Given a string and its encoding, decodes the string into Unicode.
         %encoding is a string recognized by encodings.aliases'''
 
@@ -1827,9 +1827,9 @@ class UnicodeDammit:
                 # UTF-8 with BOM
                 sniffed_xml_encoding = 'utf-8'
                 xml_data = unicode(xml_data[3:], 'utf-8').encode('utf-8')
-            else:
-                sniffed_xml_encoding = 'ascii'
-                pass
+            #else:
+            #    sniffed_xml_encoding = 'ascii'
+            #    pass
             xml_encoding_match = re.compile \
                                  ('^<\?.*encoding=[\'"](.*?)[\'"].*\?>')\
                                  .match(xml_data)
@@ -1847,20 +1847,24 @@ class UnicodeDammit:
 
 
     def find_codec(self, charset):
-        return self._codec(self.CHARSET_ALIASES.get(charset, charset)) \
-               or (charset and self._codec(charset.replace("-", ""))) \
-               or (charset and self._codec(charset.replace("-", "_"))) \
-               or charset
+        print charset
+        if not charset:
+            return None
+        charset = charset.lower().replace("_", "-")
+        charset = self.CHARSET_ALIASES.get(charset, charset)
+        return (
+            self._codec(charset) or
+            self._codec(charset.replace("-", "")) or
+            charset
+        )
 
     def _codec(self, charset):
-        if not charset: return charset
-        codec = None
         try:
             codecs.lookup(charset)
-            codec = charset
         except (LookupError, ValueError):
-            pass
-        return codec
+            return None
+        else:
+            return charset
 
     EBCDIC_TO_ASCII_MAP = None
     def _ebcdic_to_ascii(self, s):
