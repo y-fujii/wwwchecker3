@@ -1713,7 +1713,7 @@ class UnicodeDammit:
 
         # If no luck and we have auto-detection library, try that:
         if not u and chardet and not isinstance(self.markup, unicode):
-            u = self._convertFrom(chardet.detect(self.markup)['encoding'])
+            u = self._convertFrom(chardet.detect(self.markup)['encoding'], "ignore")
 
         self.unicode = u
         if not u: self.originalEncoding = None
@@ -1752,7 +1752,7 @@ class UnicodeDammit:
             self.originalEncoding = proposed
         except Exception, e:
             # print "That didn't work!"
-            print e
+            # print e
             return None
         #print "Correct encoding: %s" % proposed
         return self.markup
@@ -1779,7 +1779,7 @@ class UnicodeDammit:
         elif data[:4] == '\xff\xfe\x00\x00':
             encoding = 'utf-32le'
             data = data[4:]
-        newdata = unicode(data, encoding)
+        newdata = unicode(data, encoding, errors)
         return newdata
 
     def _detectEncoding(self, xml_data):
@@ -1827,9 +1827,9 @@ class UnicodeDammit:
                 # UTF-8 with BOM
                 sniffed_xml_encoding = 'utf-8'
                 xml_data = unicode(xml_data[3:], 'utf-8').encode('utf-8')
-            #else:
-            #    sniffed_xml_encoding = 'ascii'
-            #    pass
+            else:
+                sniffed_xml_encoding = 'ascii'
+                pass
             xml_encoding_match = re.compile \
                                  ('^<\?.*encoding=[\'"](.*?)[\'"].*\?>')\
                                  .match(xml_data)
@@ -1847,7 +1847,6 @@ class UnicodeDammit:
 
 
     def find_codec(self, charset):
-        print charset
         if not charset:
             return None
         charset = charset.lower().replace("_", "-")
