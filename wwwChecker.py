@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import re
-import os
 import threading
 import socket
 import urllib2
@@ -11,6 +10,7 @@ import time
 import pickle
 import codecs
 import difflib
+import webbrowser
 import parallel
 import htmlTools
 import config
@@ -70,7 +70,7 @@ def main():
 	outs.write( config.htmlFooter )
 	outs.close()
 
-	os.system( config.browser )
+	webbrowser.open( config.htmlFile )
 
 
 def checkUpdate( old, new ):
