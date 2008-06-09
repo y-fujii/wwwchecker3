@@ -3,14 +3,13 @@ encodings = [
 	"ascii",
 	"utf-8",
 	"euc-jp",
-	"utf-8",
 	"cp932",
 	"iso-2022-jp",
 ]
 
 
 def detect( text ):
-	bestScore = 0
+	bestScore = -1
 	bestEnc = None
 	for enc in encodings:
 		try:
