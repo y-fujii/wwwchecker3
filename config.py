@@ -6,7 +6,6 @@ nParallel = 8
 infoFile = os.environ["HOME"] + "/.www-info-1.1"
 listFile = os.environ["HOME"] + "/.www-list"
 htmlFile = os.environ["HOME"] + "/web/www-check.html"
-browser = 'firefox -remote "openURL(file://%s, new-tab)"' % htmlFile
 
 fgColor = (0, 0, 0)
 bgColor = (240, 236, 224)

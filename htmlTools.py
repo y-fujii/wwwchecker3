@@ -1,6 +1,5 @@
 
 import re
-import urllib
 import BeautifulSoup
 
 
@@ -89,6 +88,7 @@ def getContent( html ):
 
 
 if __name__ == "__main__":
+	import urllib
 	import pprint
 
 	soup = BeautifulSoup.BeautifulSoup(
