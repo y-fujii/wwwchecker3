@@ -53,6 +53,9 @@ class MyUnicodeDammit( object ):
 
 
 BeautifulSoup.UnicodeDammit = MyUnicodeDammit
+BeautifulSoup.CHARSET_RE = re.compile(
+	"((^|;)\s*[cC][hH][aA][rR][sS][eE][tT]=)([^;]*)"
+)
 
 
 inlineTags = [
@@ -60,7 +63,11 @@ inlineTags = [
 ]
 
 
-def toTextList( e ):
+def removeInlineTags():
+	pass
+
+
+def flatten( e ):
 	if isinstance( e, BeautifulSoup.NavigableString ):
 		if type( e ) in [
 			BeautifulSoup.NavigableString,
@@ -71,7 +78,7 @@ def toTextList( e ):
 
 	elif isinstance( e, BeautifulSoup.Tag ):
 		if e.name != "script":
-			return sum( [ toTextList( e ) for e in e.contents ], [] )
+			return sum( [ flatten( e ) for e in e.contents ], [] )
 
 	return []
 
@@ -81,21 +88,7 @@ def getContent( html ):
 		html,
 		convertEntities = BeautifulSoup.BeautifulSoup.XHTML_ENTITIES,
 	)
-	title = " ".join( toTextList( soup.find( "title" ) ) )
-	body = toTextList( soup.find( "body" ) )
+	title = " ".join( flatten( soup.find( "title" ) ) )
+	body = flatten( soup.find( "body" ) )
 
 	return (title, body)
-
-
-if __name__ == "__main__":
-	import urllib
-	import pprint
-
-	soup = BeautifulSoup.BeautifulSoup(
-		#urllib.urlopen( "http://park8.wakwak.com/~attyonnburike/hp/top02.htm"),
-		urllib.urlopen( "http://psychodoc.eek.jp/diary/" ),
-		convertEntities = BeautifulSoup.BeautifulSoup.XHTML_ENTITIES,
-	)
-	for line in toTextList( soup.find( "body" ) ):
-		print line.encode( "shift-jis", "ignore" )
-
