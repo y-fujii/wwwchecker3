@@ -1,4 +1,3 @@
-import sys
 import logging
 import threading
 import Queue
