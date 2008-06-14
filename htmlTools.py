@@ -61,11 +61,15 @@ BeautifulSoup.CHARSET_RE = re.compile(
 
 # In-place op.
 def stripTags( e, restTags ):
-	for (i, c) in enumerate( e.contents ):
-		if isinstance( c, BeautifulSoup.Tag ) and not c.name in restTags:
-			e.contents[i:i+1] = c.contents
-		else:
-			stripTags( c, restTags )
+	if isinstance( e, BeautifulSoup.Tag ):
+		i = 0
+		while i < len( e.contents[i:i+1] ):
+			if isinstance( e.contents[i], BeautifulSoup.Tag ) and not e.contents[i].name in restTags:
+				e.contents[i:i+1] = e.contents[i].contents
+			stripTags( e.contents[i], restTags )
+			i += 1
+	else:
+		return e
 
 
 def flatten( e ):
@@ -94,7 +98,8 @@ def getContent( html ):
 		html,
 		convertEntities = BeautifulSoup.BeautifulSoup.XHTML_ENTITIES,
 	)
-	soup.stripTags( blockTags )
+	stripTags( soup, blockTags )
+	print soup.prettify()
 	title = " ".join( flatten( soup.find( "title" ) ) )
 	body = flatten( soup.find( "body" ) )
 
