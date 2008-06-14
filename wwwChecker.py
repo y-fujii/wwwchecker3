@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import with_statement
 import socket
 import cgi
 import time
@@ -12,9 +13,11 @@ import wwwInfo
 
 
 def main():
-	urls = file( config.listFile ).read().splitlines()
+	with file( config.listFile ) as f:
+		urls = f.read().splitlines()
 	try:
-		oldInfos = pickle.load( file( config.infoFile ) )
+		with file( config.infoFile ) as f:
+			oldInfos = pickle.load( f )
 	except:
 		oldInfos = []
 	
@@ -31,39 +34,40 @@ def main():
 
 	newInfos.sort( key = lambda x: x.date )
 	newInfos.reverse()
-	pickle.dump( newInfos, file( config.infoFile, "w" ) )
+	with file( config.infoFile, "w" ) as f:
+		pickle.dump( newInfos, f )
 
-	outs = codecs.getwriter( "utf-8" )( file( config.htmlFile, "w" ) )
-	outs.write( config.htmlHeader )
-	for info in newInfos:
-		def color( r, g, b ):
-			w = max( 32 - info.ratio, 0 )
-			rr = r + w * (255 - r) / 64
-			gg = g + w * (255 - g) / 64
-			bb = b + w * (255 - b) / 64
-			return '#%02x%02x%02x' % (rr, gg, bb)
+	with file( config.htmlFile, "w" ) as f:
+		outs = codecs.getwriter( "utf-8" )( f )
+		outs.write( config.htmlHeader )
+		for info in newInfos:
+			def color( r, g, b ):
+				w = max( 32 - info.ratio, 0 )
+				rr = r + w * (255 - r) / 64
+				gg = g + w * (255 - g) / 64
+				bb = b + w * (255 - b) / 64
+				return '#%02x%02x%02x' % (rr, gg, bb)
 
-		tm = time.localtime( info.date )
-		summary = "<br />".join( cgi.escape( l ) for l in info.diff[:4] )
-		outs.write(
-			config.htmlContent % {
-				"fgColor": color( *config.fgColor ),
-				"bgColor": color( *config.bgColor ),
-				"uriColor": color( *config.uriColor ),
-				"yyyy": tm[0],
-				"mo": tm[1],
-				"dd": tm[2],
-				"hh": tm[3],
-				"mi": tm[4],
-				"info": cgi.escape( info.info ),
-				"url": cgi.escape( info.url ),
-				"title": cgi.escape( info.title ),
-				"summary": summary,
-			}
-		)
+			tm = time.localtime( info.date )
+			summary = "<br />".join( cgi.escape( l ) for l in info.diff[:4] )
+			outs.write(
+				config.htmlContent % {
+					"fgColor": color( *config.fgColor ),
+					"bgColor": color( *config.bgColor ),
+					"uriColor": color( *config.uriColor ),
+					"yyyy": tm[0],
+					"mo": tm[1],
+					"dd": tm[2],
+					"hh": tm[3],
+					"mi": tm[4],
+					"info": cgi.escape( info.info ),
+					"url": cgi.escape( info.url ),
+					"title": cgi.escape( info.title ),
+					"summary": summary,
+				}
+			)
 
-	outs.write( config.htmlFooter )
-	outs.close()
+		outs.write( config.htmlFooter )
 
 	webbrowser.open( config.htmlFile )
 

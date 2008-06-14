@@ -58,36 +58,43 @@ BeautifulSoup.CHARSET_RE = re.compile(
 )
 
 
-inlineTags = [
-	"a", "img", "span", "b", "i", "em", "strong", "q",
-]
 
-
-def removeInlineTags():
-	pass
+# In-place op.
+def stripTags( e, restTags ):
+	for (i, c) in enumerate( e.contents ):
+		if isinstance( c, BeautifulSoup.Tag ) and not c.name in restTags:
+			e.contents[i:i+1] = c.contents
+		else:
+			stripTags( c, restTags )
 
 
 def flatten( e ):
-	if isinstance( e, BeautifulSoup.NavigableString ):
-		if type( e ) in [
-			BeautifulSoup.NavigableString,
-			BeautifulSoup.CData,
-		]:
-			if e.string.strip() != "":
-				return [ re.sub( "[ \t\n\r]+", " ", e.string ) ]
+	#if isinstance( e, BeautifulSoup.NavigableString ):
+	if type( e ) in [
+		BeautifulSoup.NavigableString,
+		BeautifulSoup.CData,
+	] and e.string.strip() != "":
+		return [ re.sub( "[ \t\n\r]+", " ", e.string ) ]
 
-	elif isinstance( e, BeautifulSoup.Tag ):
-		if e.name != "script":
-			return sum( [ flatten( e ) for e in e.contents ], [] )
-
-	return []
+	elif isinstance( e, BeautifulSoup.Tag ) and e.name != "script":
+		return sum( [ flatten( e ) for e in e.contents ], [] )
+	
+	else:
+		return []
 
 
 def getContent( html ):
+	blockTags = [
+		"p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "dir", "menu",
+		"pre", "dl", "div", "center", "noscript", "noframes", "blockquote",
+		"form", "isindex", "hr", "table", "fieldset", "address", "multicol",
+	]
+
 	soup = BeautifulSoup.BeautifulSoup(
 		html,
 		convertEntities = BeautifulSoup.BeautifulSoup.XHTML_ENTITIES,
 	)
+	soup.stripTags( blockTags )
 	title = " ".join( flatten( soup.find( "title" ) ) )
 	body = flatten( soup.find( "body" ) )
 
