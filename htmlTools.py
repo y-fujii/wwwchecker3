@@ -59,20 +59,24 @@ BeautifulSoup.CHARSET_RE = re.compile(
 
 
 
-# In-place op.
-def stripTags( e, restTags ):
+def stripTags( soup, e, leftTags ):
 	if isinstance( e, BeautifulSoup.Tag ):
-		i = 0
-		while i < len( e.contents[i:i+1] ):
-			if isinstance( e.contents[i], BeautifulSoup.Tag ) and not e.contents[i].name in restTags:
-				e.contents[i:i+1] = e.contents[i].contents
-			stripTags( e.contents[i], restTags )
-			i += 1
+		strippedChildren = sum( [ stripTags( soup, c, leftTags ) for c in e.contents ], [] )
+		if e.name in leftTags:
+			dst = BeautifulSoup.Tag( soup, e.name, e.attrs ) #, e.parent, e.previous )
+			for c in strippedChildren:
+				dst.append( c )
+			return [ dst ]
+		else:
+			return strippedChildren
 	else:
-		return e
+		return [ e ]
 
 
-def flatten( e ):
+def joinString( soup, e ):
+
+
+def flatten( soup, e ):
 	#if isinstance( e, BeautifulSoup.NavigableString ):
 	if type( e ) in [
 		BeautifulSoup.NavigableString,
@@ -81,7 +85,7 @@ def flatten( e ):
 		return [ re.sub( "[ \t\n\r]+", " ", e.string ) ]
 
 	elif isinstance( e, BeautifulSoup.Tag ) and e.name != "script":
-		return sum( [ flatten( e ) for e in e.contents ], [] )
+		return sum( [ flatten( soup, e ) for e in e.contents ], [] )
 	
 	else:
 		return []
@@ -98,9 +102,14 @@ def getContent( html ):
 		html,
 		convertEntities = BeautifulSoup.BeautifulSoup.XHTML_ENTITIES,
 	)
-	stripTags( soup, blockTags )
-	print soup.prettify()
-	title = " ".join( flatten( soup.find( "title" ) ) )
-	body = flatten( soup.find( "body" ) )
+
+	body = soup.find( "body" )
+	print body.prettify()
+	body = stripTags( soup, body, blockTags )
+	print body[0].prettify()
+	body = flatten( soup, body[0] )
+
+	title = soup.find( "title" )
+	title = " ".join( flatten( soup, title ) )
 
 	return (title, body)

@@ -34,11 +34,16 @@ htmlHeader = u"""\
 			}
 
 			div {
+				/*
 				width: 40em;
+				*/
 				margin: 0.25em 0em;
 				padding: 0.25em 0.5em;
+				/*
 				overflow: hidden;
+				*/
 				-moz-border-radius: 0.5em;
+				white-space: wrap;
 			}
 
 			a {
