@@ -4,6 +4,7 @@ from email import Utils
 import time
 import difflib
 import html2text
+import sgmllib
 
 
 def checkUpdate( old, new ):
@@ -105,12 +106,15 @@ class URLInfo( object ):
 		try:
 			return self.update( *args )
 		except urllib2.HTTPError, err:
-			self.info = "Error HTTP %d" % err.code
+			self.info = "Error: HTTP %d" % err.code
 		except urllib2.URLError:
-			self.info = "Error URI"
+			self.info = "Error: URI"
 		except socket.timeout:
-			self.info = "Error timeout"
+			self.info = "Error: timeout"
+		except sgmllib.SGMLParseError:
+			self.info = "Error: invalid HTML"
 		except:
-			self.info = "Error unknown"
+			self.info = "Error: unknown"
+
 
 		return False
