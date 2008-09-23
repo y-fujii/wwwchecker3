@@ -3,7 +3,7 @@ import urllib2
 from email import Utils
 import time
 import difflib
-import htmlTools
+import html2text
 
 
 def checkUpdate( old, new ):
@@ -87,7 +87,7 @@ class URLInfo( object ):
 			else:
 				self.length = length
 
-		(self.title, text) = htmlTools.getContent( f )
+		(self.title, text) = html2text.html2Text( f.read() )
 		if self.title.strip() == "":
 			self.title = self.url
 
@@ -110,7 +110,7 @@ class URLInfo( object ):
 			self.info = "Error URI"
 		except socket.timeout:
 			self.info = "Error timeout"
-		#except:
-		#	self.info = "Error unknown"
+		except:
+			self.info = "Error unknown"
 
 		return False

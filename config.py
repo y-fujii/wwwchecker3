@@ -24,7 +24,8 @@ htmlHeader = u"""\
 				border-spacing: 0.5em;
 			}
 
-			td {
+			td.info {
+				font-family: monospace;
 				vertical-align: top;
 				white-space: nowrap;
 			}
@@ -39,11 +40,8 @@ htmlHeader = u"""\
 				*/
 				margin: 0.25em 0em;
 				padding: 0.25em 0.5em;
-				/*
 				overflow: hidden;
-				*/
 				-moz-border-radius: 0.5em;
-				white-space: wrap;
 			}
 
 			a {
@@ -62,9 +60,8 @@ htmlHeader = u"""\
 
 htmlContent = u"""
 <tr style="color: %(fgColor)s">
-<td>%(yyyy)04d-%(mo)02d-%(dd)02d %(hh)02d:%(mi)02d</td>
-<td>%(info)s</td>
-<td>
+<td class="info">%(yyyy)04d-%(mo)02d-%(dd)02d&nbsp;%(hh)02d:%(mi)02d&nbsp;&nbsp;%(info)s</td>
+<td class="text">
 <a href="%(url)s" style="color: %(uriColor)s">%(title)s</a>
 <div style="background-color: %(bgColor)s">
 %(summary)s
