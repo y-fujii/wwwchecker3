@@ -3,7 +3,7 @@ import re
 import BeautifulSoup
 
 
-class MyUnicodeDammit( object ):
+class CustomDammit( object ):
 	encodings = [
 		"utf-8",
 		"euc-jp",
@@ -20,6 +20,8 @@ class MyUnicodeDammit( object ):
 
 
 	def __init__( self, src, encs, *args, **kws ):
+		self.declaredHTMLEncoding = None
+
 		def f( e ):
 			e = e.lower().replace( "_", "-" )
 			return self.replaceMap.get( e, e )
@@ -52,64 +54,58 @@ class MyUnicodeDammit( object ):
 		)
 
 
-BeautifulSoup.UnicodeDammit = MyUnicodeDammit
-BeautifulSoup.CHARSET_RE = re.compile(
-	"((^|;)\s*[cC][hH][aA][rR][sS][eE][tT]=)([^;]*)"
+BeautifulSoup.UnicodeDammit = CustomDammit
+BeautifulSoup.BeautifulSoup.start_meta = lambda *args, **kws: None
+
+blockTags = (
+	[ "h1", "h2", "h3", "h4", "h5", "h6", "br", "hr" ] +
+	BeautifulSoup.BeautifulSoup.NESTABLE_BLOCK_TAGS +
+	BeautifulSoup.BeautifulSoup.NESTABLE_LIST_TAGS.keys() +
+	BeautifulSoup.BeautifulSoup.NESTABLE_TABLE_TAGS.keys() +
+	BeautifulSoup.BeautifulSoup.NON_NESTABLE_BLOCK_TAGS
 )
 
 
-
-def stripTags( soup, e, leftTags ):
+def dumpText( e ):
 	if isinstance( e, BeautifulSoup.Tag ):
-		strippedChildren = sum( [ stripTags( soup, c, leftTags ) for c in e.contents ], [] )
-		if e.name in leftTags:
-			dst = BeautifulSoup.Tag( soup, e.name, e.attrs ) #, e.parent, e.previous )
-			for c in strippedChildren:
-				dst.append( c )
-			return [ dst ]
-		else:
-			return strippedChildren
-	else:
-		return [ e ]
+		buff = ""
+		text = []
+		for c in e.contents:
+			cText = dumpText( c )
+			if isinstance( c, BeautifulSoup.Tag ):
+				if c.name in blockTags:
+					text += cText
+					buff = ""
+				else:
+					l = len( cText )
+					if l == 0:
+						pass
+					elif l == 1:
+						buff += cText[0]
+					else:
+						text += [ buff + cText[0] ]
+						buff = cText[-1]
+			elif isinstance( c, BeautifulSoup.NavigableString ):
+				buff += c.string
 
+		if buff.strip() != "":
+			text += [ buff ]
+		return text
 
-def joinString( soup, e ):
+	elif isinstance( e, BeautifulSoup.NavigableString ):
+		return [ e.string ]
 
-
-def flatten( soup, e ):
-	#if isinstance( e, BeautifulSoup.NavigableString ):
-	if type( e ) in [
-		BeautifulSoup.NavigableString,
-		BeautifulSoup.CData,
-	] and e.string.strip() != "":
-		return [ re.sub( "[ \t\n\r]+", " ", e.string ) ]
-
-	elif isinstance( e, BeautifulSoup.Tag ) and e.name != "script":
-		return sum( [ flatten( soup, e ) for e in e.contents ], [] )
-	
 	else:
 		return []
 
 
 def getContent( html ):
-	blockTags = [
-		"p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "dir", "menu",
-		"pre", "dl", "div", "center", "noscript", "noframes", "blockquote",
-		"form", "isindex", "hr", "table", "fieldset", "address", "multicol",
-	]
-
 	soup = BeautifulSoup.BeautifulSoup(
 		html,
 		convertEntities = BeautifulSoup.BeautifulSoup.XHTML_ENTITIES,
 	)
 
-	body = soup.find( "body" )
-	print body.prettify()
-	body = stripTags( soup, body, blockTags )
-	print body[0].prettify()
-	body = flatten( soup, body[0] )
-
-	title = soup.find( "title" )
-	title = " ".join( flatten( soup, title ) )
+	body = dumpText( soup.find( "body" ) )
+	title = " ".join( dumpText( soup.find( "title" ) ) )
 
 	return (title, body)

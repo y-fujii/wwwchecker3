@@ -17,10 +17,11 @@ def run( procs, n ):
 				except Queue.Empty:
 					break
 
-				try:
-					proc()
-				except Exception, err:
-					logging.error( str( err ) )
+				proc()
+				#try:
+				#	proc()
+				#except Exception, err:
+				#	logging.error( str( err ) )
 
 		thr = threading.Thread( target = threadProc )
 		thr.start()
