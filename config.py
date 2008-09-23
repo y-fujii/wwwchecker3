@@ -35,9 +35,9 @@ htmlHeader = u"""\
 			}
 
 			div {
-				/*
-				width: 40em;
-				*/
+				line-height: 1.5em;
+				max-width: 40em;
+				max-height: 6em;
 				margin: 0.25em 0em;
 				padding: 0.25em 0.5em;
 				overflow: hidden;
