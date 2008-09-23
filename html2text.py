@@ -14,7 +14,6 @@ def unicodeAuto( src, encs = encodings ):
 	bestEnc = None
 	for enc in encs:
 		try:
-			print enc
 			return unicode( src, enc )
 		except UnicodeDecodeError, err:
 			if err.end > bestScore:
