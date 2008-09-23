@@ -38,7 +38,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 
 	def __init__( self ):
 		sgmllib.SGMLParser.__init__( self )
-		self.buff = u""
+		self.buff = ""
 		self.text = []
 		self.title = ""
 	
@@ -52,7 +52,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 			line = self.normText( self.buff )
 			if line != "":
 				self.text += [ line ]
-			self.buff = u""
+			self.buff = ""
 	
 
 	def unknown_endtag( self, tag ):
@@ -65,7 +65,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 			elif line != "":
 				self.text += [ line ]
 
-			self.buff = u""
+			self.buff = ""
 
 
 	def handle_data( self, data ):
@@ -81,7 +81,9 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 
 
 def html2Text( html ):
+	html = unicodeAuto( html )
+	html = re.sub( "<([^<>]+)/>", "<\\1 />", html )
 	parser = HTML2TextParser()
-	parser.feed( unicodeAuto( html ) )
+	parser.feed( html )
 	parser.close()
 	return (parser.title, parser.text)
