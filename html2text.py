@@ -14,6 +14,7 @@ def unicodeAuto( src, encs = encodings ):
 	bestEnc = None
 	for enc in encs:
 		try:
+			print enc
 			return unicode( src, enc )
 		except UnicodeDecodeError, err:
 			if err.end > bestScore:
@@ -72,17 +73,16 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 		self.buff += data
 	
 
-	def handle_charref( self, ref ):
+	def convert_charref( self, name ):
 		try:
-			c = unichr( int( ref ) )
-			self.handle_data( c )
+			return unichr( int( name ) )
 		except:
-			pass
+			return None
 
 
 def html2Text( html ):
 	html = unicodeAuto( html )
-	html = re.sub( "<([^<>]+)/>", "<\\1></\\1>", html )
+	html = re.sub( "<([^<>]+)/>", "<\\1 />", html )
 	parser = HTML2TextParser()
 	parser.feed( html )
 	parser.close()

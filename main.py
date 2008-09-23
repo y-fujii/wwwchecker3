@@ -49,7 +49,7 @@ def main():
 				return '#%02x%02x%02x' % (rr, gg, bb)
 
 			tm = time.localtime( info.date )
-			summary = "<br />".join( cgi.escape( l ) for l in info.diff[:4] )
+			summary = "<br />\n".join( cgi.escape( l ) for l in info.diff[:4] )
 			outs.write(
 				config.htmlContent % {
 					"fgColor": color( *config.fgColor ),

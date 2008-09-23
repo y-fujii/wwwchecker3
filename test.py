@@ -24,8 +24,9 @@ src = """\
 aaa<br/>aaa<br />aaa
 """
 
-#src = urllib.urlopen( "http://d.hatena.ne.jp/higepon/" ).read()
+src = urllib.urlopen( "http://d.hatena.ne.jp/higepon/" ).read()
 #src = urllib.urlopen( "http://www-ui.is.s.u-tokyo.ac.jp/~takeo/diary/diary.html" ).read()
+
 
 
 
