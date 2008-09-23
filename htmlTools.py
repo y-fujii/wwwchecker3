@@ -85,14 +85,16 @@ def dumpText( e ):
 					else:
 						text += [ buff + cText[0] ]
 						buff = cText[-1]
-			elif isinstance( c, BeautifulSoup.NavigableString ):
+			#elif isinstance( c, BeautifulSoup.NavigableString ):
+			elif type( e ) in [ BeautifulSoup.NavigableString, BeautifulSoup.CData ]:
 				buff += c.string
 
 		if buff.strip() != "":
 			text += [ buff ]
 		return text
 
-	elif isinstance( e, BeautifulSoup.NavigableString ):
+	#elif isinstance( e, BeautifulSoup.NavigableString ):
+	elif type( e ) in [ BeautifulSoup.NavigableString, BeautifulSoup.CData ]:
 		return [ e.string ]
 
 	else:

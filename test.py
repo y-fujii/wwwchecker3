@@ -1,7 +1,7 @@
 
 import pprint
 import urllib
-import htmlTools
+import html2text
 
 src = """\
 <html>
@@ -12,7 +12,7 @@ src = """\
 				<td>B</td>
 			</tr>
 			<tr>
-				<td>C</td>
+				<td>C
 				<td>D</td>
 			</tr>
 		</table>
@@ -20,7 +20,10 @@ src = """\
 </html>
 """
 
-src = urllib.urlopen( "http://d.hatena.ne.jp/KZR/" ).read()
+#src = urllib.urlopen( "http://d.hatena.ne.jp/higepon/" ).read()
+src = urllib.urlopen( "http://www-ui.is.s.u-tokyo.ac.jp/~takeo/diary/diary.html" ).read()
 
-for line in htmlTools.getContent( src )[0]:
+
+
+for line in html2text.html2Text( src )[1]:
 	print line.encode( "euc-jp", "ignore" )
