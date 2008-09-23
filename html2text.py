@@ -82,7 +82,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 
 def html2Text( html ):
 	html = unicodeAuto( html )
-	html = re.sub( "<([^<>]+)/>", "<\\1 />", html )
+	html = re.sub( "<([^<>]+)/>", "<\\1></\\1>", html )
 	parser = HTML2TextParser()
 	parser.feed( html )
 	parser.close()
