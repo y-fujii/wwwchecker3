@@ -1,5 +1,5 @@
 import re
-import sgmllib
+import HTMLParser
 
 
 encodings = [
@@ -23,7 +23,7 @@ def unicodeAuto( src, encs = encodings ):
 	return unicode( src, bestEnc, "ignore" )
 
 
-class HTML2TextParser( sgmllib.SGMLParser ):
+class HTML2TextParser( HTMLParser.HTMLParser ):
 
 	tagsBlock = [
 		"h1", "h2", "h3", "h4", "h5", "h6",
@@ -37,28 +37,27 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 
 
 	def __init__( self ):
-		sgmllib.SGMLParser.__init__( self )
+		HTMLParser.HTMLParser.__init__( self )
 		self.buff = ""
 		self.text = []
 		self.title = ""
 	
 	
-	def nextLine( self ):
-		line = re.sub( "[ \t\r\n]+", " ", self.buff ).strip()
-		self.buff = ""
-		return line
+	def normText( self, text ):
+		return re.sub( "[ \t\r\n]+", " ", text ).strip()
 
 
-	def unknown_starttag( self, tag, _ ):
+	def handle_starttag( self, tag, _ ):
 		if tag in self.tagsBlock:
-			line = self.nextLine()
+			line = self.normText( self.buff )
 			if line != "":
 				self.text += [ line ]
+			self.buff = ""
 	
 
-	def unknown_endtag( self, tag ):
+	def handle_endtag( self, tag ):
 		if tag in self.tagsBlock:
-			line = self.nextLine()
+			line = self.normText( self.buff )
 			if tag == "title":
 				self.title = line
 			elif tag in ["script", "style"]:
@@ -66,21 +65,16 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 			elif line != "":
 				self.text += [ line ]
 
+			self.buff = ""
+
 
 	def handle_data( self, data ):
 		self.buff += data
-	
-
-	def convert_charref( self, name ):
-		try:
-			return unichr( int( name ) )
-		except:
-			return None
 
 
 def html2Text( html ):
 	html = unicodeAuto( html )
-	html = re.sub( "<([^<>]+)/>", "<\\1 />", html )
+	#html = re.sub( "<([^<>]+)/>", "<\\1 />", html )
 	parser = HTML2TextParser()
 	parser.feed( html )
 	parser.close()
