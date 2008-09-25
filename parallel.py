@@ -11,10 +11,16 @@ class Runner( object ):
 			self.queue.put( proc )
 
 		self.threads = []
-		for _ in xrange( n ):
-			thr = threading.Thread( target = self._threadProc )
-			thr.start()
-			self.threads.append( thr )
+		try:
+			for _ in xrange( n ):
+				thr = threading.Thread( target = self._threadProc )
+				thr.start()
+				self.threads.append( thr )
+		except StandardError:
+			# XXX
+			self.cancel()
+			#self.join()
+			raise
 		
 
 	def join( self ):

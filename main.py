@@ -32,6 +32,7 @@ def main():
 	newInfos = [ f( url ) for url in urls ]
 
 	socket.setdefaulttimeout( 30 )
+	#signal.signal( signal.SIGINT, signal.SIG_IGN )
 
 	def update( info ):
 		info.updateSafe()
@@ -60,10 +61,10 @@ def main():
 		outs.write( config.htmlHeader )
 		for info in newInfos:
 			def color( r, g, b ):
-				w = max( 16 - info.ratio, 0 )
-				rr = r + w * (255 - r) / 32
-				gg = g + w * (255 - g) / 32
-				bb = b + w * (255 - b) / 32
+				w = max( 8 - info.ratio, 0 )
+				rr = r + w * (255 - r) / 16
+				gg = g + w * (255 - g) / 16
+				bb = b + w * (255 - b) / 16
 				return '#%02x%02x%02x' % (rr, gg, bb)
 
 			tm = time.localtime( info.date )
