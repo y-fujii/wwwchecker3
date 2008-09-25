@@ -1,31 +1,44 @@
-import logging
 import threading
 import Queue
+#import logging
 
 
-def run( procs, n ):
-	queue = Queue.Queue()
-	for proc in procs:
-		queue.put( proc )
+class Runner( object ):
 
-	thrs = []
-	for _ in xrange( n ):
-		def threadProc():
-			while True:
-				try:
-					proc = queue.get_nowait()
-				except Queue.Empty:
-					break
+	def __init__( self, procs, n ):
+		self.queue = Queue.Queue()
+		for proc in procs:
+			self.queue.put( proc )
 
-				proc()
-				#try:
-				#	proc()
-				#except Exception, err:
-				#	logging.error( str( err ) )
+		self.threads = []
+		for _ in xrange( n ):
+			thr = threading.Thread( target = self._threadProc )
+			thr.start()
+			self.threads.append( thr )
+		
 
-		thr = threading.Thread( target = threadProc )
-		thr.start()
-		thrs.append( thr )
-	
-	for thr in thrs:
-		thr.join()
+	def join( self ):
+		for thr in self.threads:
+			thr.join()
+
+
+	def cancel( self ):
+		while True:
+			try:
+				self.queue.get_nowait()
+			except Queue.Empty:
+				break
+
+
+	def _threadProc( self ):
+		while True:
+			try:
+				proc = self.queue.get_nowait()
+			except Queue.Empty:
+				break
+
+			#try:
+			#	proc()
+			#except Exception, err:
+			#	logging.error( str( err ) )
+			proc()

@@ -19,24 +19,21 @@ htmlHeader = u"""\
 		<title>www-checker</title>
 		<style type="text/css">
 			table {
+				width: 95%;
+				line-height: 1.5em;
 				margin-left: auto;
 				margin-right: auto;
+				table-layout: fixed;
 				border-spacing: 0.5em;
 			}
 
 			td.info {
+				width: 18em;
 				font-family: monospace;
 				vertical-align: top;
-				white-space: nowrap;
-			}
-
-			p {
-				margin: 0;
 			}
 
 			div {
-				line-height: 1.5em;
-				max-width: 40em;
 				max-height: 6em;
 				margin: 0.25em 0em;
 				padding: 0.25em 0.5em;
