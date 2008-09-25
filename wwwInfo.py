@@ -46,17 +46,18 @@ class URLInfo( object ):
 		self.url = url
 		self.text = []
 		self.date = 0
-		self.length = 0
+		self.size = 0
 		self.ratio = 0
 		self.info = ""
 		self.diff = []
 		self.title = url
 
 
-	def update( self, checkUpdate = checkUpdate ):
-		# XXX
-		print self.url
-
+	def update(
+		self,
+		checkUpdate = checkUpdate,
+		html2Text = html2text.html2Text,
+	):
 		req = urllib2.Request( self.url, headers = {
 			"if-modified-since": Utils.formatdate( self.date )
 		} )
@@ -71,7 +72,9 @@ class URLInfo( object ):
 				raise
 
 		if "last-modified" in f.info():
-			date = Utils.mktime_tz( Utils.parsedate_tz( f.info()["last-modified"] ) )
+			date = Utils.mktime_tz(
+				Utils.parsedate_tz( f.info()["last-modified"] )
+			)
 			if date == self.date:
 				self.info = "Last-modified"
 				self.ratio = 0
@@ -80,15 +83,15 @@ class URLInfo( object ):
 			date = time.time()
 
 		if "content-length" in f.info():
-			length = f.info()["content-length"]
-			if length == self.length:
+			size = f.info()["content-length"]
+			if size == self.size:
 				self.info = "Content-length"
 				self.ratio = 0
 				return False
 			else:
-				self.length = length
+				self.size = size
 
-		(self.title, text) = html2text.html2Text( f.read() )
+		(self.title, text) = html2Text( f.read() )
 		if self.title.strip() == "":
 			self.title = self.url
 
@@ -113,8 +116,7 @@ class URLInfo( object ):
 			self.info = "Error: timeout"
 		except sgmllib.SGMLParseError:
 			self.info = "Error: invalid HTML"
-		except:
-			self.info = "Error: unknown"
-
+		#except StandardError:
+		#	self.info = "Error: unknown"
 
 		return False
