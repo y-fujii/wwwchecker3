@@ -17,10 +17,20 @@ class Runner( object ):
 				thr.start()
 				self.threads.append( thr )
 		except StandardError:
-			# XXX
-			self.cancel()
-			#self.join()
+			try:
+				self.cancel()
+				self.join()
+			except: pass
 			raise
+	
+
+	def __exit__( self, *args ):
+		try:
+			self.cancel()
+			self.join()
+		except: pass
+
+		return False
 		
 
 	def join( self ):

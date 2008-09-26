@@ -74,7 +74,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 	def convert_charref( self, name ):
 		try:
 			return unichr( int( name ) )
-		except:
+		except StandardError:
 			return None
 
 
