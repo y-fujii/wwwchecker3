@@ -20,7 +20,7 @@ def main():
 	try:
 		with file( config.infoFile ) as f:
 			oldInfos = pickle.load( f )
-	except:
+	except StandardError:
 		oldInfos = []
 	
 	infoDict = dict( (t.url, t) for t in oldInfos )
@@ -32,7 +32,6 @@ def main():
 	newInfos = [ f( url ) for url in urls ]
 
 	socket.setdefaulttimeout( 30 )
-	#signal.signal( signal.SIGINT, signal.SIG_IGN )
 
 	def update( info ):
 		info.updateSafe()
@@ -42,15 +41,9 @@ def main():
 		[ lambda i = i: update( i ) for i in newInfos ],
 		config.nParallel,
 	)
-
-	# XXX
-	#def onSigInt( *args ):
-	#	runner.cancel()
-	#	runner.join()
-	#	sys.exit( 1 )
-	#signal.signal( signal.SIGINT, onSigInt )
-
-	runner.join()
+	# KeyboardInterruppt or ...
+	with runner:
+		runner.join()
 
 	newInfos.sort( key = lambda x: -x.date )
 	with file( config.infoFile, "w" ) as f:
