@@ -2,7 +2,7 @@
 import os
 
 
-nParallel = 8
+nParallel = 4
 infoFile = os.environ["HOME"] + "/.www-info-1.2"
 listFile = os.environ["HOME"] + "/.www-list"
 htmlFile = os.environ["HOME"] + "/.www-check.html"

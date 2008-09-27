@@ -1,10 +1,12 @@
+from __future__ import with_statement
+import contextlib
 import socket
 import urllib2
 from email import Utils
 import time
 import difflib
-import html2text
 import sgmllib
+import html2text
 
 
 def checkUpdate( old, new ):
@@ -71,38 +73,39 @@ class URLInfo( object ):
 			else:
 				raise
 
-		if "last-modified" in f.info():
-			date = Utils.mktime_tz(
-				Utils.parsedate_tz( f.info()["last-modified"] )
-			)
-			if date == self.date:
-				self.info = "Last-modified"
-				self.ratio = 0
-				return False
-		else:
-			date = time.time()
-
-		if "content-length" in f.info():
-			size = f.info()["content-length"]
-			if size == self.size:
-				self.info = "Content-length"
-				self.ratio = 0
-				return False
+		with contextlib.closing( f ):
+			if "last-modified" in f.info():
+				date = Utils.mktime_tz(
+					Utils.parsedate_tz( f.info()["last-modified"] )
+				)
+				if date == self.date:
+					self.info = "Last-modified"
+					self.ratio = 0
+					return False
 			else:
-				self.size = size
+				date = time.time()
 
-		(self.title, text) = html2Text( f.read() )
-		if self.title.strip() == "":
-			self.title = self.url
+			if "content-length" in f.info():
+				size = f.info()["content-length"]
+				if size == self.size:
+					self.info = "Content-length"
+					self.ratio = 0
+					return False
+				else:
+					self.size = size
 
-		(self.ratio, diff, self.info) = checkUpdate( self.text, text )
-		self.text = text
-		if self.ratio > 0:
-			self.date = date
-			self.diff = diff
-			return True
-		else:
-			return False
+			(self.title, text) = html2Text( f.read() )
+			if self.title.strip() == "":
+				self.title = self.url
+
+			(self.ratio, diff, self.info) = checkUpdate( self.text, text )
+			self.text = text
+			if self.ratio > 0:
+				self.date = date
+				self.diff = diff
+				return True
+			else:
+				return False
 
 
 	def updateSafe( self, *args ):
