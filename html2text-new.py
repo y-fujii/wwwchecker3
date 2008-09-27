@@ -30,13 +30,23 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 		"ul", "ol", "li", "dl", "dt", "dd",
 		"p", "div", "blockquote", "pre",
 		"form", "table", "tr", "td", "br",
-		"hr", "address", "fieldset",
-		"body", "head", "center",
+		"hr", "address", "fieldset", "body",
+		"script", "noscript", "head", "title",
+		"style", "center",
 	]
 
+	tagsStacked = [
+		"div", "ul", "ol", "dl", "table",
+		"body", "head", "script", "style",
+	]
+
+	tagsIgnore = [
+		"script", "style",
+	]
 
 	def __init__( self ):
 		sgmllib.SGMLParser.__init__( self )
+		self.tags = []
 		self.buff = ""
 		self.text = []
 		self.title = ""
@@ -51,22 +61,38 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 	def unknown_starttag( self, tag, _ ):
 		if tag in self.tagsBlock:
 			line = self.nextLine()
-			if line != "":
+			if self.tags and ("script" in self.tags or "style" in self.tags):
+				pass
+			elif line != "":
 				self.text += [ line ]
+
+		if tag in [ "script", "style" ]:
+			self.setliteral()
+
+		if tag in self.tagsStacked:
+			self.tags += [ tag ]
 	
 
 	def unknown_endtag( self, tag ):
 		if tag in self.tagsBlock:
 			line = self.nextLine()
-			if line != "":
+			if tag == "title":
+				self.title = line
+			if self.tags and ("script" in self.tags or "style" in self.tags):
+				pass
+			elif tag in [ "script", "style" ]:
+				pass
+			elif line != "":
 				self.text += [ line ]
-		elif tag == "title":
-			self.title = self.nextLine()
-		elif tag in [ "script", "style" ]:
-			self.nextLine()
+
+		if tag in self.tags:
+			nextTag = self.tags.pop()
+			if nextTag != nextTag():
+				pass
 
 
 	def handle_data( self, data ):
+		print self.tags, data.encode( "euc-jp", "ignore" )
 		self.buff += data
 	
 

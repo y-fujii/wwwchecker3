@@ -2,13 +2,14 @@
 
 from __future__ import with_statement
 import sys
-import signal
 import socket
+import threading
 import cgi
 import time
 import pickle
 import codecs
 import webbrowser
+import misc
 import parallel
 import config
 import wwwInfo
@@ -33,16 +34,22 @@ def main():
 
 	socket.setdefaulttimeout( 30 )
 
+	stdoutLock = threading.Lock()
 	def update( info ):
 		info.updateSafe()
-		# XXX
-		print info.url
+		with stdoutLock:
+			sys.stdout.write( info.url + "\n" )
+			sys.stdout.flush()
+
+	# One can call runner.cancel() from other thread to stop this safely.
+	# But the process can not receive signals during runner.join().
+	# So we make the thread as daemon mode...
 	runner = parallel.Runner(
 		[ lambda i = i: update( i ) for i in newInfos ],
 		config.nParallel,
+		True,
 	)
-	# KeyboardInterruppt or ...
-	with runner:
+	with misc.disposing( runner ):
 		runner.join()
 
 	newInfos.sort( key = lambda x: -x.date )

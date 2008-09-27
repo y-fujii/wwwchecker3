@@ -5,7 +5,7 @@ import Queue
 
 class Runner( object ):
 
-	def __init__( self, procs, n ):
+	def __init__( self, procs, n, isDaemon = False ):
 		self.queue = Queue.Queue()
 		for proc in procs:
 			self.queue.put( proc )
@@ -14,23 +14,19 @@ class Runner( object ):
 		try:
 			for _ in xrange( n ):
 				thr = threading.Thread( target = self._threadProc )
+				thr.setDaemon( isDaemon )
 				thr.start()
 				self.threads.append( thr )
 		except StandardError:
-			try:
-				self.cancel()
-				self.join()
-			except: pass
+			self.__del__()
 			raise
 	
 
-	def __exit__( self, *args ):
+	def __del__( self ):
 		try:
 			self.cancel()
-			self.join()
+			self.join() # ...
 		except: pass
-
-		return False
 		
 
 	def join( self ):
