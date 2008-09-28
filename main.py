@@ -17,6 +17,42 @@ import config
 import wwwInfo
 
 
+def renderHTML( out, infos, config ):
+	out.write( config.htmlHeader )
+	for info in infos:
+		def color( cn, c0, c1 ):
+			w = min( info.ratio, config.lineMax )
+			if w == 0:
+				(rr, gg, bb) = cn
+			else:
+				rr = w * (c1[0] - c0[0]) / config.lineMax + c0[0]
+				gg = w * (c1[1] - c0[1]) / config.lineMax + c0[1]
+				bb = w * (c1[2] - c0[2]) / config.lineMax + c0[2]
+
+			return '#%02x%02x%02x' % (rr, gg, bb)
+
+		tm = time.localtime( info.date )
+		summary = "<br />\n".join( cgi.escape( l ) for l in info.diff[:4] )
+		out.write(
+			config.htmlContent % {
+				"fgColor": color( *config.fgColor ),
+				"bgColor": color( *config.bgColor ),
+				"uriColor": color( *config.uriColor ),
+				"yyyy": tm[0],
+				"mo": tm[1],
+				"dd": tm[2],
+				"hh": tm[3],
+				"mi": tm[4],
+				"info": cgi.escape( info.info ),
+				"url": cgi.escape( info.url ),
+				"title": cgi.escape( info.title ),
+				"summary": summary,
+			}
+		)
+
+	out.write( config.htmlFooter )
+
+
 def main():
 	with file( config.listFile ) as f:
 		urls = f.read().splitlines()
@@ -59,40 +95,8 @@ def main():
 		pickle.dump( newInfos, f )
 
 	with file( config.htmlFile, "w" ) as f:
-		outs = codecs.getwriter( "utf-8" )( f )
-		outs.write( config.htmlHeader )
-		for info in newInfos:
-			def color( cn, c0, c1 ):
-				w = min( info.ratio, config.lineMax )
-				if w == 0:
-					(rr, gg, bb) = cn
-				else:
-					rr = w * (c1[0] - c0[0]) / config.lineMax + c0[0]
-					gg = w * (c1[1] - c0[1]) / config.lineMax + c0[1]
-					bb = w * (c1[2] - c0[2]) / config.lineMax + c0[2]
-
-				return '#%02x%02x%02x' % (rr, gg, bb)
-
-			tm = time.localtime( info.date )
-			summary = "<br />\n".join( cgi.escape( l ) for l in info.diff[:4] )
-			outs.write(
-				config.htmlContent % {
-					"fgColor": color( *config.fgColor ),
-					"bgColor": color( *config.bgColor ),
-					"uriColor": color( *config.uriColor ),
-					"yyyy": tm[0],
-					"mo": tm[1],
-					"dd": tm[2],
-					"hh": tm[3],
-					"mi": tm[4],
-					"info": cgi.escape( info.info ),
-					"url": cgi.escape( info.url ),
-					"title": cgi.escape( info.title ),
-					"summary": summary,
-				}
-			)
-
-		outs.write( config.htmlFooter )
+		out = codecs.getwriter( "utf-8" )( f )
+		renderHTML( out, newInfos, config )
 
 	webbrowser.open( config.htmlFile )
 
