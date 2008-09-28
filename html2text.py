@@ -53,6 +53,8 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 			line = self.nextLine()
 			if line != "":
 				self.text += [ line ]
+		elif tag in [ "script", "style" ]:
+			self.setliteral()
 	
 
 	def unknown_endtag( self, tag ):
