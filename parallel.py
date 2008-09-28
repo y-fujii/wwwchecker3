@@ -40,10 +40,6 @@ class Runner( object ):
 				self.queue.get_nowait()
 			except Queue.Empty:
 				break
-	
-
-	def isFinished( self ):
-		return len( self.threads ) == 0
 
 
 	def _threadProc( self ):
