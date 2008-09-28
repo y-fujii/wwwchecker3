@@ -1,3 +1,4 @@
+# (c) Yasuhiro Fujii <fuji at mail-box dot jp> / 2-clause BSDL
 
 import contextlib
 
