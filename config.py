@@ -7,16 +7,16 @@ infoFile = os.environ["HOME"] + "/.www-info-1.2"
 listFile = os.environ["HOME"] + "/.www-list"
 htmlFile = os.environ["HOME"] + "/.www-check.html"
 
-fgColor = (0, 0, 0)
-bgColor = (240, 236, 224)
-uriColor = (16, 128, 16)
+lineMax = 8
+fgColor =  ( (127, 127, 127), (127, 127, 127), (  0,   0,   0) )
+bgColor =  ( (243, 247, 247), (247, 245, 239), (240, 236, 224) )
+uriColor = ( (135, 191, 135), (135, 191, 135), ( 16, 128,  16) )
 
 htmlHeader = u"""\
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 	<head>
-		<meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8" />
-		<title>www-checker</title>
+		<title>wwwChecker</title>
 		<style type="text/css">
 			table {
 				width: 95%;
