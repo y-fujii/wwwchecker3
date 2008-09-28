@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# (c) Yasuhiro Fujii <fuji at mail-box dot jp> / 2-clause BSDL
+
 
 from __future__ import with_statement
 import sys
