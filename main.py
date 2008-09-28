@@ -60,11 +60,15 @@ def main():
 		outs = codecs.getwriter( "utf-8" )( f )
 		outs.write( config.htmlHeader )
 		for info in newInfos:
-			def color( r, g, b ):
-				w = max( 8 - info.ratio, 0 )
-				rr = r + w * (255 - r) / 16
-				gg = g + w * (255 - g) / 16
-				bb = b + w * (255 - b) / 16
+			def color( cn, c0, c1 ):
+				w = min( info.ratio, config.lineMax )
+				if w == 0:
+					(rr, gg, bb) = cn
+				else:
+					rr = w * (c1[0] - c0[0]) / config.lineMax + c0[0]
+					gg = w * (c1[1] - c0[1]) / config.lineMax + c0[1]
+					bb = w * (c1[2] - c0[2]) / config.lineMax + c0[2]
+
 				return '#%02x%02x%02x' % (rr, gg, bb)
 
 			tm = time.localtime( info.date )
