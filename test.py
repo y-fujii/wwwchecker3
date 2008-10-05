@@ -33,8 +33,9 @@ src = """\
 
 #src = urllib.urlopen( "http://www-ui.is.s.u-tokyo.ac.jp/~takeo/diary/diary.html" ).read()
 #src = urllib.urlopen( "http://morihyphen.infoseek.ne.jp" ).read()
-src = urllib.urlopen( "http://www.number21.jp/diary/sanama/" ).read()
-print src 
+#src = urllib.urlopen( "http://www.number21.jp/diary/sanama/" ).read()
+#src = urllib.urlopen( "http://www.geocities.jp/akimasanari/" ).read()
+src = urllib.urlopen( "http://feynman777.blog14.fc2.com/" ).read()
 
 for line in html2text.html2Text( src )[1]:
 	print line.encode( "euc-jp", "ignore" )

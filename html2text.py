@@ -34,6 +34,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 		"form", "table", "tr", "td", "br",
 		"hr", "address", "fieldset",
 		"body", "head", "center",
+		"title", "script", "style", # quirks
 	]
 
 
@@ -55,19 +56,20 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 			line = self.nextLine()
 			if line != "":
 				self.text += [ line ]
-		elif tag in [ "script", "style" ]:
+
+		if tag in [ "script", "style" ]:
 			self.setliteral()
 	
 
 	def unknown_endtag( self, tag ):
-		if tag in self.tagsBlock:
+		if tag in [ "script", "style" ]:
+			self.nextLine()
+		elif tag == "title":
+			self.title = self.nextLine()
+		elif tag in self.tagsBlock:
 			line = self.nextLine()
 			if line != "":
 				self.text += [ line ]
-		elif tag == "title":
-			self.title = self.nextLine()
-		elif tag in [ "script", "style" ]:
-			self.nextLine()
 
 
 	def handle_data( self, data ):

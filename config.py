@@ -8,7 +8,8 @@ infoFile = os.environ["HOME"] + "/.www-info-1.2"
 listFile = os.environ["HOME"] + "/.www-list"
 htmlFile = os.environ["HOME"] + "/.www-check.html"
 
-lineMax = 8
+maxRatio = 8
+maxLine = 4
 fgColor =  ( (127, 127, 127), (127, 127, 127), (  0,   0,   0) )
 bgColor =  ( (243, 247, 247), (247, 245, 239), (240, 236, 224) )
 uriColor = ( (135, 191, 135), (135, 191, 135), ( 16, 128,  16) )
@@ -36,6 +37,7 @@ htmlHeader = u"""\
 
 			div {
 				max-height: 6em;
+				_height: 6em;
 				margin: 0.25em 0em;
 				padding: 0.25em 0.5em;
 				overflow: hidden;

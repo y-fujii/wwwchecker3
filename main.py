@@ -21,18 +21,18 @@ def renderHTML( out, infos, config ):
 	out.write( config.htmlHeader )
 	for info in infos:
 		def color( cn, c0, c1 ):
-			w = min( info.ratio, config.lineMax )
+			w = min( info.ratio, config.maxRatio )
 			if w == 0:
 				(rr, gg, bb) = cn
 			else:
-				rr = w * (c1[0] - c0[0]) / config.lineMax + c0[0]
-				gg = w * (c1[1] - c0[1]) / config.lineMax + c0[1]
-				bb = w * (c1[2] - c0[2]) / config.lineMax + c0[2]
+				rr = w * (c1[0] - c0[0]) / config.maxRatio + c0[0]
+				gg = w * (c1[1] - c0[1]) / config.maxRatio + c0[1]
+				bb = w * (c1[2] - c0[2]) / config.maxRatio + c0[2]
 
 			return '#%02x%02x%02x' % (rr, gg, bb)
 
 		tm = time.localtime( info.date )
-		summary = "<br />\n".join( cgi.escape( l ) for l in info.diff[:4] )
+		summary = "<br />\n".join( cgi.escape( l ) for l in info.diff[:config.maxLine] )
 		out.write(
 			config.htmlContent % {
 				"fgColor": color( *config.fgColor ),
