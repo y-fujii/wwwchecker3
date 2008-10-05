@@ -7,6 +7,9 @@ SRC = \
 	wwwInfo.py
 
 
+test: $(SRC)
+	python test.py
+
 check: $(SRC)
 	pychecker $(SRC)
 
