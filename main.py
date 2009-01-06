@@ -70,7 +70,7 @@ def main():
 			return wwwInfo.URLInfo( url )
 	newInfos = [ f( url ) for url in urls ]
 
-	socket.setdefaulttimeout( 30 )
+	socket.setdefaulttimeout( config.timeOut )
 
 	stdoutLock = threading.Lock()
 	def update( info ):

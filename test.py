@@ -35,7 +35,11 @@ src = """\
 #src = urllib.urlopen( "http://morihyphen.infoseek.ne.jp" ).read()
 #src = urllib.urlopen( "http://www.number21.jp/diary/sanama/" ).read()
 #src = urllib.urlopen( "http://www.geocities.jp/akimasanari/" ).read()
-src = urllib.urlopen( "http://feynman777.blog14.fc2.com/" ).read()
+#src = urllib.urlopen( "http://feynman777.blog14.fc2.com/" ).read()
+src = urllib.urlopen( "http://prmr.hp.infoseek.co.jp/main.html" ).read()
+
+print src
+
 
 for line in html2text.html2Text( src )[1]:
 	print line.encode( "euc-jp", "ignore" )

@@ -7,14 +7,14 @@ SRC = \
 	wwwInfo.py
 
 
-test: $(SRC)
-	python test.py
-
 check: $(SRC)
 	pychecker $(SRC)
 
+test: $(SRC)
+	python test.py
+
 package: $(SRC)
-	tar cvzf www-checker.tar.gz $(SRC)
+	tar cvzf wwwChecker.tar.gz $(SRC)
 
 clean:
-	-rm *.pyc
+	rm -f *.pyc wwwChecker.tar.gz

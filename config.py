@@ -3,6 +3,7 @@
 import os
 
 
+timeOut = 30
 nParallel = 4
 infoFile = os.environ["HOME"] + "/.www-info-1.2"
 listFile = os.environ["HOME"] + "/.www-list"
