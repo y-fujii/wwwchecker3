@@ -3,6 +3,7 @@
 from __future__ import with_statement
 import contextlib
 import socket
+import httplib
 import urllib2
 from email import Utils
 import time
@@ -117,6 +118,8 @@ class URLInfo( object ):
 			self.info = "Error: HTTP %d" % err.code
 		except urllib2.URLError:
 			self.info = "Error: URI"
+		except httplib.HTTPException:
+			self.info = "Error: invalid HTTP"
 		except socket.timeout:
 			self.info = "Error: timeout"
 		except sgmllib.SGMLParseError:
