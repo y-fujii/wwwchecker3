@@ -6,4 +6,5 @@ import contextlib
 @contextlib.contextmanager
 def disposing( obj ):
 	yield obj
-	obj.__del__()
+	if hasattr( obj, "__del__" ):
+		obj.__del__()
