@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# (c) Yasuhiro Fujii <fuji at mail-box dot jp> / 2-clause BSDL
+# by y-fujii <fuji at mail-box.jp>, public domain
 
 
 from __future__ import with_statement
