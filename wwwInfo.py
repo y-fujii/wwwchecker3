@@ -2,6 +2,8 @@
 
 from __future__ import with_statement
 import contextlib
+import StringIO
+import gzip
 import socket
 import httplib
 import urllib2
@@ -64,7 +66,8 @@ class URLInfo( object ):
 		html2Text = html2text.html2Text,
 	):
 		req = urllib2.Request( self.url, headers = {
-			"if-modified-since": Utils.formatdate( self.date )
+			"if-modified-since": Utils.formatdate( self.date ),
+			"accept-encoding": "gzip",
 		} )
 		try:
 			f = urllib2.urlopen( req )
@@ -97,18 +100,23 @@ class URLInfo( object ):
 				else:
 					self.size = size
 
-			(self.title, text) = html2Text( f.read() )
-			if self.title.strip() == "":
-				self.title = self.url
-
-			(self.ratio, diff, self.info) = checkUpdate( self.text, text )
-			self.text = text
-			if self.ratio > 0:
-				self.date = date
-				self.diff = diff
-				return True
+			if f.info().get( "content-encoding", "" ) == "gzip":
+				html = gzip.GzipFile( fileobj = StringIO.StringIO( f.read() ) ).read()
 			else:
-				return False
+				html = f.read()
+
+		(self.title, text) = html2Text( html )
+		if self.title.strip() == "":
+			self.title = self.url
+
+		(self.ratio, diff, self.info) = checkUpdate( self.text, text )
+		self.text = text
+		if self.ratio > 0:
+			self.date = date
+			self.diff = diff
+			return True
+		else:
+			return False
 
 
 	def updateSafe( self, *args ):
