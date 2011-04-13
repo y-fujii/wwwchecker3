@@ -1,4 +1,4 @@
-# by y-fujii <fuji at mail-box.jp>, public domain
+# by y.fujii <y-fujii at mimosa-pudica.net>, public domain
 
 import re
 import sgmllib

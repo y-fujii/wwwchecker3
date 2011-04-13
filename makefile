@@ -8,10 +8,7 @@ SRC = \
 
 
 check: $(SRC)
-	pychecker $(SRC)
-
-test: $(SRC)
-	python test.py
+	pyflakes $(SRC)
 
 package: $(SRC)
 	tar cvzf wwwChecker.tar.gz $(SRC)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# by y-fujii <fuji at mail-box.jp>, public domain
+# by y.fujii <y-fujii at mimosa-pudica.net>, public domain
 
 
 from __future__ import with_statement
@@ -11,7 +11,6 @@ import time
 import pickle
 import codecs
 import webbrowser
-import misc
 import parallel
 import config
 import wwwInfo
@@ -43,7 +42,7 @@ def renderHTML( out, infos, config ):
 				"dd": tm[2],
 				"hh": tm[3],
 				"mi": tm[4],
-				"info": cgi.escape( info.info ),
+				"status": cgi.escape( info.status ),
 				"url": cgi.escape( info.url ),
 				"title": cgi.escape( info.title ),
 				"summary": summary,
@@ -74,21 +73,21 @@ def main():
 
 	stdoutLock = threading.Lock()
 	def update( info ):
-		info.updateSafe()
+		wwwInfo.updateSafe( info )
 		with stdoutLock:
 			sys.stdout.write( info.url + "\n" )
 			sys.stdout.flush()
 
-	# One can call runner.cancel() from other thread to stop this safely.
-	# But the process can not receive signals during runner.join().
-	# So we make the thread as daemon mode...
 	runner = parallel.Runner(
 		[ lambda i = i: update( i ) for i in newInfos ],
 		config.nParallel,
-		True,
 	)
-	with misc.disposing( runner ):
+	try:
 		runner.join()
+	except:
+		runner.cancel()
+		runner.join()
+		raise
 
 	newInfos.sort( key = lambda x: -x.date )
 	with file( config.infoFile, "w" ) as f:
