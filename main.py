@@ -75,7 +75,7 @@ def main():
 	def update( info ):
 		wwwInfo.updateSafe( info )
 		with stdoutLock:
-			sys.stdout.write( info.url + "\n" )
+			sys.stdout.write( "\r\x1b[K" + info.url )
 			sys.stdout.flush()
 
 	runner = parallel.Runner(
@@ -88,6 +88,8 @@ def main():
 		runner.cancel()
 		runner.join()
 		raise
+
+	sys.stdout.write( "\r\x1b[K" )
 
 	newInfos.sort( key = lambda x: -x.date )
 	with file( config.infoFile, "w" ) as f:
