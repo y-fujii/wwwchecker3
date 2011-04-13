@@ -1,4 +1,4 @@
-# by y-fujii <fuji at mail-box.jp>, public domain
+# by y.fujii <y-fujii at mimosa-pudica.net>, public domain
 
 from __future__ import with_statement
 import contextlib
@@ -14,7 +14,20 @@ import sgmllib
 import html2text
 
 
-def checkUpdate( old, new ):
+class URLInfo( object ):
+
+	def __init__( self, url ):
+		self.url = url
+		self.text = []
+		self.date = 0
+		self.size = 0
+		self.ratio = 0
+		self.status = ""
+		self.diff = []
+		self.title = url
+
+
+def testUpdate( old, new ):
 	opcodes = difflib.SequenceMatcher( None, old, new ).get_opcodes()
 
 	#nIns = sum(j2 - j1 for (tag, i1, i2, j1, j2) in opcodes if tag != "equal")
@@ -47,92 +60,77 @@ def checkUpdate( old, new ):
 	)
 
 
-class URLInfo( object ):
+def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
+	req = urllib2.Request( info.url, headers = {
+		"if-modified-since": Utils.formatdate( info.date ),
+		"accept-encoding": "gzip",
+	} )
+	try:
+		f = urllib2.urlopen( req )
+	except urllib2.HTTPError, err:
+		if err.code == 304:
+			info.status = "If-modified-since"
+			info.ratio = 0
+			return False
+		else:
+			raise
 
-	def __init__( self, url ):
-		self.url = url
-		self.text = []
-		self.date = 0
-		self.size = 0
-		self.ratio = 0
-		self.info = ""
-		self.diff = []
-		self.title = url
+	with contextlib.closing( f ):
+		if "last-modified" in f.info():
+			date = Utils.mktime_tz(
+				Utils.parsedate_tz( f.info()["last-modified"] )
+			)
+			if date == info.date:
+				info.status = "Last-modified"
+				info.ratio = 0
+				return False
+		else:
+			date = time.time()
 
-
-	def update(
-		self,
-		checkUpdate = checkUpdate,
-		html2Text = html2text.html2Text,
-	):
-		req = urllib2.Request( self.url, headers = {
-			"if-modified-since": Utils.formatdate( self.date ),
-			"accept-encoding": "gzip",
-		} )
-		try:
-			f = urllib2.urlopen( req )
-		except urllib2.HTTPError, err:
-			if err.code == 304:
-				self.info = "If-modified-since"
-				self.ratio = 0
+		if "content-length" in f.info():
+			size = f.info()["content-length"]
+			if size == info.size:
+				info.status = "Content-length"
+				info.ratio = 0
 				return False
 			else:
-				raise
+				info.size = size
 
-		with contextlib.closing( f ):
-			if "last-modified" in f.info():
-				date = Utils.mktime_tz(
-					Utils.parsedate_tz( f.info()["last-modified"] )
-				)
-				if date == self.date:
-					self.info = "Last-modified"
-					self.ratio = 0
-					return False
-			else:
-				date = time.time()
-
-			if "content-length" in f.info():
-				size = f.info()["content-length"]
-				if size == self.size:
-					self.info = "Content-length"
-					self.ratio = 0
-					return False
-				else:
-					self.size = size
-
-			if f.info().get( "content-encoding", "" ) == "gzip":
-				html = gzip.GzipFile( fileobj = StringIO.StringIO( f.read() ) ).read()
-			else:
-				html = f.read()
-
-		(self.title, text) = html2Text( html )
-		if self.title.strip() == "":
-			self.title = self.url
-
-		(self.ratio, diff, self.info) = checkUpdate( self.text, text )
-		self.text = text
-		if self.ratio > 0:
-			self.date = date
-			self.diff = diff
-			return True
+		if f.info().get( "content-encoding", "" ) == "gzip":
+			html = gzip.GzipFile( fileobj = StringIO.StringIO( f.read() ) ).read()
 		else:
-			return False
+			html = f.read()
 
+	(info.title, text) = html2Text( html )
+	if info.title.strip() == "":
+		info.title = info.url
 
-	def updateSafe( self, *args ):
-		try:
-			return self.update( *args )
-		except urllib2.HTTPError, err:
-			self.info = "Error: HTTP %d" % err.code
-		except urllib2.URLError:
-			self.info = "Error: URI"
-		except httplib.HTTPException:
-			self.info = "Error: invalid HTTP"
-		except socket.timeout:
-			self.info = "Error: timeout"
-		except sgmllib.SGMLParseError:
-			self.info = "Error: invalid HTML"
-		#except StandardError:
-		#	self.info = "Error: unknown"
-
+	(info.ratio, diff, info.status) = testUpdate( info.text, text )
+	info.text = text
+	if info.ratio > 0:
+		info.date = date
+		info.diff = diff
+		return True
+	else:
 		return False
+
+
+def updateSafe( info, *args ):
+	try:
+		return update( info, *args )
+	except urllib2.HTTPError, err:
+		info.status = "Error: HTTP %d" % err.code
+	except urllib2.URLError:
+		info.status = "Error: invalid URL"
+	except httplib.HTTPException:
+		info.status = "Error: invalid HTTP"
+	except socket.timeout:
+		info.status = "Error: timeout"
+	except sgmllib.SGMLParseError:
+		info.status = "Error: invalid HTML"
+	except ValueError:
+		info.status = "Error: invalid URL"
+	#except StandardError:
+	#	info.status = "Error: unknown"
+
+	return False
