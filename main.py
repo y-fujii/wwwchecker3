@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # by y.fujii <y-fujii at mimosa-pudica.net>, public domain
 
 
@@ -85,8 +85,8 @@ def main():
 	try:
 		runner.join()
 	except:
-		runner.cancel()
-		runner.join()
+		runner.__del__()
+		runner = None
 		raise
 
 	sys.stdout.write( "\r\x1b[K" )

@@ -1,17 +1,16 @@
 SRC = \
-	config.py \
-	html2text.py \
-	main.py \
-	misc.py \
 	parallel.py \
-	wwwInfo.py
-
+	html2text.py \
+	wwwInfo.py \
+	main.py \
+	config.py
 
 check: $(SRC)
 	pyflakes $(SRC)
 
 package: $(SRC)
-	tar cvzf wwwChecker.tar.gz $(SRC)
+	cd ..; \
+	tar cvzf wwwChecker.tar.gz $(addprefix wwwChecker/, $(SRC))
 
 clean:
 	rm -f *.pyc wwwChecker.tar.gz
