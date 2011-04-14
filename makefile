@@ -13,4 +13,4 @@ package: $(SRC)
 	tar cvzf wwwChecker.tar.gz $(addprefix wwwChecker/, $(SRC))
 
 clean:
-	rm -f *.pyc wwwChecker.tar.gz
+	rm -f *.pyc
