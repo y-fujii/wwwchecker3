@@ -30,9 +30,6 @@ class URLInfo( object ):
 def testUpdate( old, new ):
 	opcodes = difflib.SequenceMatcher( None, old, new ).get_opcodes()
 
-	#nIns = sum(j2 - j1 for (tag, i1, i2, j1, j2) in opcodes if tag != "equal")
-	#nDel = sum(i2 - i1 for (tag, i1, i2, j1, j2) in opcodes if tag != "equal")
-	#nRep = sum(i2 - i1 + j2 - j1 for (tag, i1, i2, j1, j2) in opcodes if tag == "replace")
 	nIns = 0
 	nDel = 0
 	nRep = 0
@@ -136,3 +133,5 @@ def updateSafe( info, *args ):
 		info.status = "Error: invalid URL"
 	#except StandardError:
 	#	info.status = "Error: unknown"
+
+	return False
