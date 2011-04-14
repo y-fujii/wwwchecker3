@@ -20,7 +20,7 @@ class URLInfo( object ):
 		self.url = url
 		self.text = []
 		self.date = 0
-		self.size = 0
+		self.size = -1
 		self.ratio = 0
 		self.status = ""
 		self.diff = []
@@ -94,7 +94,7 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 				info.ratio = 0
 				return False
 		else:
-			size = 0
+			size = -1
 
 		if f.info().get( "content-encoding", "" ) == "gzip":
 			html = gzip.GzipFile( fileobj = StringIO.StringIO( f.read() ) ).read()
@@ -120,6 +120,7 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 
 def updateSafe( info, *args ):
 	try:
+		info.ratio = 0
 		return update( info, *args )
 	except urllib2.HTTPError, err:
 		info.status = "Error: HTTP %d" % err.code
