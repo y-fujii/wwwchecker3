@@ -93,20 +93,23 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 				info.status = "Content-length"
 				info.ratio = 0
 				return False
-			else:
-				info.size = size
+		else:
+			size = 0
 
 		if f.info().get( "content-encoding", "" ) == "gzip":
 			html = gzip.GzipFile( fileobj = StringIO.StringIO( f.read() ) ).read()
 		else:
 			html = f.read()
 
-	(info.title, text) = html2Text( html )
-	if info.title.strip() == "":
+	(title, text) = html2Text( html )
+	(info.ratio, diff, info.status) = testUpdate( info.text, text )
+	info.size = size
+	info.text = text
+	if title.strip() != "":
+		info.title = title
+	else:
 		info.title = info.url
 
-	(info.ratio, diff, info.status) = testUpdate( info.text, text )
-	info.text = text
 	if info.ratio > 0:
 		info.date = date
 		info.diff = diff
