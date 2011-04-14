@@ -132,5 +132,3 @@ def updateSafe( info, *args ):
 		info.status = "Error: invalid URL"
 	#except StandardError:
 	#	info.status = "Error: unknown"
-
-	return False

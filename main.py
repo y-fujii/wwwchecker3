@@ -90,6 +90,7 @@ def main():
 		raise
 
 	sys.stdout.write( "\r\x1b[K" )
+	sys.stdout.flush()
 
 	newInfos.sort( key = lambda x: -x.date )
 	with file( config.infoFile, "w" ) as f:
