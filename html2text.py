@@ -33,7 +33,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 		"p", "div", "blockquote", "pre",
 		"form", "table", "tr", "td", "br",
 		"hr", "address", "fieldset",
-		"body", "head", "center",
+		"html", "body", "head", "center",
 		"title", "script", "style", # quirks
 	]
 
@@ -44,6 +44,13 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 		self.text = []
 		self.title = ""
 	
+
+	def close( self ):
+		sgmllib.SGMLParser.close( self )
+		line = self.nextLine()
+		if line != "":
+			self.text.append( line )
+
 	
 	def nextLine( self ):
 		line = re.sub( "[ \t\r\n]+", " ", self.buff ).strip()
@@ -55,7 +62,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 		if tag in self.tagsBlock:
 			line = self.nextLine()
 			if line != "":
-				self.text += [ line ]
+				self.text.append( line )
 
 		if tag in [ "script", "style" ]:
 			self.setliteral()
@@ -69,7 +76,7 @@ class HTML2TextParser( sgmllib.SGMLParser ):
 		elif tag in self.tagsBlock:
 			line = self.nextLine()
 			if line != "":
-				self.text += [ line ]
+				self.text.append( line )
 
 
 	def handle_data( self, data ):
