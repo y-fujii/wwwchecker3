@@ -83,12 +83,14 @@ def main():
 
 	socket.setdefaulttimeout( config.timeOut )
 
-	bgnTime = time.time()
-
 	lock = threading.Lock()
+	times = []
 	def update( info ):
+		bgnTime = time.time()
 		wwwInfo.updateSafe( info )
+		endTime = time.time()
 		with lock:
+			times.append( endTime - bgnTime )
 			sys.stdout.write( "\r\x1b[K" + info.url )
 			sys.stdout.flush()
 
@@ -102,11 +104,9 @@ def main():
 		runner.abort()
 		raise
 
-	endTime = time.time()
-
-	sys.stdout.write( "\r\x1b[K%.1f ms / sites\n" % (
-		(endTime - bgnTime) * 1000.0 / len( newInfos )
-	) )
+	sys.stdout.write(
+		"\r\x1b[K%.1f ms / sites (median)\n" % (median( times ) * 1000.0)
+	)
 	sys.stdout.flush()
 
 	newInfos.sort( key = lambda x: -x.date )
