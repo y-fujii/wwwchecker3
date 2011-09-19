@@ -24,9 +24,13 @@ class Runner( object ):
 
 	def __del__( self ):
 		try:
-			self.cancel()
-			self.join() # ...
+			self.abort()
 		except: pass
+	
+
+	def abort( self ):
+		self.cancel()
+		self.join() # ...
 		
 
 	def join( self ):

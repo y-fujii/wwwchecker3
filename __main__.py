@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
 # by y.fujii <y-fujii at mimosa-pudica.net>, public domain
 
 
+from __future__ import division
 from __future__ import with_statement
 import sys
 import socket
@@ -10,10 +10,21 @@ import cgi
 import time
 import pickle
 import codecs
+import random
 import webbrowser
 import parallel
 import config
 import wwwInfo
+
+
+def median( xs ):
+	n = len( xs )
+	ys = sorted( xs )
+	assert n > 0
+	if n % 2 == 0:
+		return (ys[n // 2 - 1] + ys[n // 2]) / 2.0
+	else:
+		return ys[n // 2]
 
 
 def renderHTML( out, infos, config ):
@@ -68,13 +79,16 @@ def main():
 		else:
 			return wwwInfo.URLInfo( url )
 	newInfos = [ f( url ) for url in urls ]
+	random.shuffle( newInfos )
 
 	socket.setdefaulttimeout( config.timeOut )
 
-	stdoutLock = threading.Lock()
+	bgnTime = time.time()
+
+	lock = threading.Lock()
 	def update( info ):
 		wwwInfo.updateSafe( info )
-		with stdoutLock:
+		with lock:
 			sys.stdout.write( "\r\x1b[K" + info.url )
 			sys.stdout.flush()
 
@@ -85,11 +99,14 @@ def main():
 	try:
 		runner.join()
 	except:
-		runner.__del__()
-		runner = None
+		runner.abort()
 		raise
 
-	sys.stdout.write( "\r\x1b[K" )
+	endTime = time.time()
+
+	sys.stdout.write( "\r\x1b[K%.1f ms / sites\n" % (
+		(endTime - bgnTime) * 1000.0 / len( newInfos )
+	) )
 	sys.stdout.flush()
 
 	newInfos.sort( key = lambda x: -x.date )
@@ -104,4 +121,7 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	try:
+		main()
+	except StandardError:
+		sys.stdout.write( "Error.\n" )
