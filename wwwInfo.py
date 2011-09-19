@@ -7,7 +7,7 @@ import gzip
 import socket
 import httplib
 import urllib2
-from email import Utils
+from email import utils
 import time
 import difflib
 import sgmllib
@@ -59,7 +59,7 @@ def testUpdate( old, new ):
 
 def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 	req = urllib2.Request( info.url, headers = {
-		"if-modified-since": Utils.formatdate( info.date ),
+		"if-modified-since": utils.formatdate( info.date ),
 		"accept-encoding": "gzip",
 	} )
 	try:
@@ -74,8 +74,8 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 
 	with contextlib.closing( f ):
 		if "last-modified" in f.info():
-			date = Utils.mktime_tz(
-				Utils.parsedate_tz( f.info()["last-modified"] )
+			date = utils.mktime_tz(
+				utils.parsedate_tz( f.info()["last-modified"] )
 			)
 			if date == info.date:
 				info.status = "Last-modified"
