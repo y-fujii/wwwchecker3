@@ -22,33 +22,33 @@ htmlHeader = u"""\
 		<meta charset="utf-8" />
 		<title>wwwChecker</title>
 		<style type="text/css">
+			* {
+				font: 100%/1.5 sans-serif;
+				margin:  0;
+				padding: 0;
+				text-decoration: none;
+			}
+
 			table {
 				width: 95%;
-				line-height: 1.5;
-				margin-left: auto;
+				margin-left:  auto;
 				margin-right: auto;
 				table-layout: fixed;
 				border-spacing: 0.5em;
 			}
 
 			td.status {
+				font-family: WorkAroundWebKitAndGecko, monospace;
 				width: 18em;
-				font-family: monospace;
 				vertical-align: top;
 			}
 
 			div {
 				max-height: 6em;
-				_height: 6em;
-				margin: 0.25em 0em;
+				margin:  0.25em 0.0em;
 				padding: 0.25em 0.5em;
 				overflow: hidden;
 				border-radius: 0.5em;
-				-moz-border-radius: 0.5em;
-			}
-
-			a {
-				text-decoration: none;
 			}
 
 			a:hover {
