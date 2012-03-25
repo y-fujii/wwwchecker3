@@ -2,7 +2,7 @@ SRC = \
 	parallel.py \
 	html2text.py \
 	wwwInfo.py \
-	main.py \
+	__main__.py \
 	config.py
 
 check: $(SRC)

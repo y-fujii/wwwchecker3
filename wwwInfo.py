@@ -28,7 +28,7 @@ class URLInfo( object ):
 
 
 def testUpdate( old, new ):
-	opcodes = difflib.SequenceMatcher( None, old, new ).get_opcodes()
+	opcodes = difflib.SequenceMatcher( None, old, new, autojunk = False ).get_opcodes()
 
 	nIns = 0
 	nDel = 0
