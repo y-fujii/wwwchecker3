@@ -1,7 +1,9 @@
-# by y.fujii <y-fujii at mimosa-pudica.net>, public domain
+# by Yasuhiro Fujii <y-fujii at mimosa-pudica.net>, public domain
 
 import re
-import sgmllib
+import io
+import html.parser
+import html.entities
 
 
 encodings = [
@@ -16,84 +18,89 @@ def unicodeAuto( src, encs = encodings ):
 	bestEnc = None
 	for enc in encs:
 		try:
-			return unicode( src, enc )
-		except UnicodeDecodeError, err:
+			return str( src, enc )
+		except UnicodeDecodeError as err:
 			if err.end > bestScore:
 				bestScore = err.end
 				bestEnc = enc
 
-	return unicode( src, bestEnc, "ignore" )
+	return str( src, bestEnc, "ignore" )
 
 
-class HTML2TextParser( sgmllib.SGMLParser ):
+class HTML2TextParser( html.parser.HTMLParser ):
 
+	# ref: http://www.w3.org/TR/html5/
 	tagsBlock = [
-		"h1", "h2", "h3", "h4", "h5", "h6",
-		"ul", "ol", "li", "dl", "dt", "dd",
-		"p", "div", "blockquote", "pre",
-		"form", "table", "tr", "td", "br",
-		"hr", "address", "fieldset",
-		"html", "body", "head", "center",
-		"title", "script", "style", # quirks
+		"html", "head", "title", "base", "link", "meta", "style", "script",
+		"noscript", "body", "article", "section", "nav", "aside", "h1", "h2",
+		"h3", "h4", "h5", "h6", "hgroup", "header", "footer", "address", "p",
+		"hr", "pre", "blockquote", "ol", "ul", "li", "dl", "dt", "dd",
+		"figure", "figcaption", "div", "table", "caption", "colgroup", "col",
+		"tbody", "thead", "tfoot", "tr", "br",
 	]
 
 
 	def __init__( self ):
-		sgmllib.SGMLParser.__init__( self )
-		self.buff = ""
+		html.parser.HTMLParser.__init__( self )
+		self.buf = io.StringIO()
 		self.text = []
 		self.title = ""
 	
 
 	def close( self ):
-		sgmllib.SGMLParser.close( self )
+		html.parser.HTMLParser.close( self )
+		self.pushLine()
+
+	
+	def nextLine( self ):
+		line = self.buf.getvalue()
+		line = re.sub( "[ \t\r\n]+", " ", line )
+		line = line.strip()
+		self.buf = io.StringIO()
+		return line
+
+
+	def pushLine( self ):
 		line = self.nextLine()
 		if line != "":
 			self.text.append( line )
 
-	
-	def nextLine( self ):
-		line = re.sub( "[ \t\r\n]+", " ", self.buff ).strip()
-		self.buff = ""
-		return line
 
-
-	def unknown_starttag( self, tag, _ ):
+	def handle_starttag( self, tag, _ ):
 		if tag in self.tagsBlock:
-			line = self.nextLine()
-			if line != "":
-				self.text.append( line )
-
-		if tag in [ "script", "style" ]:
-			self.setliteral()
+			self.pushLine()
 	
 
-	def unknown_endtag( self, tag ):
+	def handle_endtag( self, tag ):
 		if tag in [ "script", "style" ]:
 			self.nextLine()
 		elif tag == "title":
 			self.title = self.nextLine()
 		elif tag in self.tagsBlock:
-			line = self.nextLine()
-			if line != "":
-				self.text.append( line )
+			self.pushLine()
 
 
 	def handle_data( self, data ):
-		self.buff += data
+		self.buf.write( data )
 	
 
-	def convert_charref( self, name ):
+	def handle_entityref( self, name ):
 		try:
-			return unichr( int( name ) )
-		except StandardError:
-			return None
+			c = chr( html.entities.name2codepoint[name] )
+		except KeyError:
+			c = " %s " % name
+		self.buf.write( c )
+
+	def handle_charref( self, name ):
+		if name.startswith( "x" ):
+			n = int( name[1:], 16 )
+		else:
+			n = int( name )
+		self.buf.write( chr( n ) )
 
 
 def html2Text( html ):
-	html = unicodeAuto( html )
-	html = re.sub( "<([^<>]+)/>", "<\\1 />", html )
 	parser = HTML2TextParser()
-	parser.feed( html )
+	parser.feed( unicodeAuto( html ) )
 	parser.close()
 	return (parser.title, parser.text)

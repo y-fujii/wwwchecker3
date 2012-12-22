@@ -1,20 +1,18 @@
-# by y.fujii <y-fujii at mimosa-pudica.net>, public domain
+# by Yasuhiro Fujii <y-fujii at mimosa-pudica.net>, public domain
 
-from __future__ import with_statement
 import contextlib
-import StringIO
+import io
 import gzip
 import socket
-import httplib
-import urllib2
+import urllib.request
+import urllib.error
 from email import utils
 import time
 import difflib
-import sgmllib
 import html2text
 
 
-class URLInfo( object ):
+class UrlInfo( object ):
 
 	def __init__( self, url ):
 		self.url = url
@@ -58,13 +56,13 @@ def testUpdate( old, new ):
 
 
 def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
-	req = urllib2.Request( info.url, headers = {
+	req = urllib.request.Request( info.url, headers = {
 		"if-modified-since": utils.formatdate( info.date ),
 		"accept-encoding": "gzip",
 	} )
 	try:
-		f = urllib2.urlopen( req )
-	except urllib2.HTTPError, err:
+		f = urllib.request.urlopen( req )
+	except urllib.error.HTTPError as err:
 		if err.code == 304:
 			info.status = "If-modified-since"
 			info.ratio = 0
@@ -94,7 +92,7 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 			size = -1
 
 		if f.info().get( "content-encoding", "" ) == "gzip":
-			html = gzip.GzipFile( fileobj = StringIO.StringIO( f.read() ) ).read()
+			html = gzip.GzipFile( fileobj = io.BytesIO( f.read() ) ).read()
 		else:
 			html = f.read()
 
@@ -119,19 +117,13 @@ def updateSafe( info, *args ):
 	try:
 		info.ratio = 0
 		return update( info, *args )
-	except urllib2.HTTPError, err:
-		info.status = "Error: HTTP %d" % err.code
-	except urllib2.URLError:
-		info.status = "Error: invalid URL"
-	except httplib.HTTPException:
-		info.status = "Error: invalid HTTP"
-	except socket.timeout:
-		info.status = "Error: timeout"
-	except sgmllib.SGMLParseError:
-		info.status = "Error: invalid HTML"
 	except ValueError:
 		info.status = "Error: invalid URL"
-	#except StandardError:
-	#	info.status = "Error: unknown"
+	except urllib.error.HTTPError as err:
+		info.status = "Error: HTTP %d" % err.code
+	except urllib.error.URLError as err:
+		info.status = "Error: %s" % err.reason
+	except socket.timeout:
+		info.status = "Error: timeout"
 
 	return False
