@@ -1,19 +1,19 @@
-# by y.fujii <y-fujii at mimosa-pudica.net>, public domain
+# by Yasuhiro Fujii <y-fujii at mimosa-pudica.net>, public domain
 
 import threading
-import Queue
+import queue
 
 
 class Runner( object ):
 
 	def __init__( self, procs, n ):
-		self.queue = Queue.Queue()
+		self.queue = queue.Queue()
 		for proc in procs:
 			self.queue.put( proc )
 
 		self.threads = []
 		try:
-			for _ in xrange( n ):
+			for _ in range( n ):
 				thr = threading.Thread( target = self._threadProc )
 				thr.start()
 				self.threads.append( thr )
@@ -44,7 +44,7 @@ class Runner( object ):
 		while True:
 			try:
 				self.queue.get_nowait()
-			except Queue.Empty:
+			except queue.Empty:
 				break
 
 
@@ -52,6 +52,10 @@ class Runner( object ):
 		while True:
 			try:
 				proc = self.queue.get_nowait()
-			except Queue.Empty:
+			except queue.Empty:
 				break
+
 			proc()
+			#try:
+			#	proc()
+			#except: pass

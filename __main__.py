@@ -1,8 +1,5 @@
-# by y.fujii <y-fujii at mimosa-pudica.net>, public domain
+# by Yasuhiro Fujii <y-fujii at mimosa-pudica.net>, public domain
 
-
-from __future__ import division
-from __future__ import with_statement
 import sys
 import socket
 import threading
@@ -13,8 +10,8 @@ import codecs
 import random
 import webbrowser
 import parallel
-import config
 import wwwInfo
+import config
 
 
 def median( xs ):
@@ -27,7 +24,7 @@ def median( xs ):
 		return ys[n // 2]
 
 
-def renderHTML( out, infos, config ):
+def renderHtml( out, infos, config ):
 	out.write( config.htmlHeader )
 	for info in infos:
 		def color( cn, c0, c1 ):
@@ -35,9 +32,9 @@ def renderHTML( out, infos, config ):
 			if w == 0:
 				(rr, gg, bb) = cn
 			else:
-				rr = w * (c1[0] - c0[0]) / config.maxRatio + c0[0]
-				gg = w * (c1[1] - c0[1]) / config.maxRatio + c0[1]
-				bb = w * (c1[2] - c0[2]) / config.maxRatio + c0[2]
+				rr = w * (c1[0] - c0[0]) // config.maxRatio + c0[0]
+				gg = w * (c1[1] - c0[1]) // config.maxRatio + c0[1]
+				bb = w * (c1[2] - c0[2]) // config.maxRatio + c0[2]
 
 			return '#%02x%02x%02x' % (rr, gg, bb)
 
@@ -64,20 +61,20 @@ def renderHTML( out, infos, config ):
 
 
 def main():
-	with file( config.listFile ) as f:
+	with open( config.listFile ) as f:
 		urls = f.read().splitlines()
 	try:
-		with file( config.infoFile ) as f:
+		with open( config.infoFile, "rb" ) as f:
 			oldInfos = pickle.load( f )
-	except StandardError:
+	except IOError:
 		oldInfos = []
 	
 	infoDict = dict( (t.url, t) for t in oldInfos )
 	def f( url ):
-		if url in infoDict:
+		try:
 			return infoDict[url]
-		else:
-			return wwwInfo.URLInfo( url )
+		except KeyError:
+			return wwwInfo.UrlInfo( url )
 	newInfos = [ f( url ) for url in urls ]
 	random.shuffle( newInfos )
 
@@ -105,23 +102,19 @@ def main():
 		raise
 
 	sys.stdout.write(
-		"\r\x1b[K%.1f ms / sites (median)\n" % (median( times ) * 1000.0)
+		"\r\x1b[KMd = %.0fms\n" % (median( times ) * 1000.0)
 	)
 	sys.stdout.flush()
 
 	newInfos.sort( key = lambda x: -x.date )
-	with file( config.infoFile, "w" ) as f:
+	with open( config.infoFile, "wb" ) as f:
 		pickle.dump( newInfos, f )
 
-	with file( config.htmlFile, "w" ) as f:
-		out = codecs.getwriter( "utf-8" )( f )
-		renderHTML( out, newInfos, config )
+	with open( config.htmlFile, "w" ) as f:
+		renderHtml( f, newInfos, config )
 
 	webbrowser.open( config.htmlFile )
 
 
 if __name__ == "__main__":
-	try:
-		main()
-	except StandardError:
-		sys.stdout.write( "Error.\n" )
+	main()
