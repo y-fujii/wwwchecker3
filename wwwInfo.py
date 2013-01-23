@@ -117,13 +117,11 @@ def updateSafe( info, *args ):
 	try:
 		info.ratio = 0
 		return update( info, *args )
-	except ValueError:
-		info.status = "Error: invalid URL"
 	except urllib.error.HTTPError as err:
 		info.status = "Error: HTTP %d" % err.code
-	except urllib.error.URLError as err:
-		info.status = "Error: %s" % err.reason
-	except socket.timeout:
-		info.status = "Error: timeout"
+	except OSError:
+		info.status = "Error: I/O"
+	except ValueError:
+		info.status = "Error: invalid URL"
 
 	return False
