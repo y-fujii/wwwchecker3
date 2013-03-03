@@ -6,7 +6,6 @@ import threading
 import cgi
 import time
 import pickle
-import codecs
 import random
 import webbrowser
 import parallel
