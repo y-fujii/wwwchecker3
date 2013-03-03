@@ -3,7 +3,6 @@
 import contextlib
 import io
 import gzip
-import socket
 import urllib.request
 import urllib.error
 from email import utils
