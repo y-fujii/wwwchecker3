@@ -1,6 +1,7 @@
 # by Yasuhiro Fujii <y-fujii at mimosa-pudica.net>, public domain
 
 import contextlib
+import re
 import io
 import gzip
 import urllib.request
@@ -25,7 +26,9 @@ class UrlInfo( object ):
 
 
 def testUpdate( old, new ):
-	opcodes = difflib.SequenceMatcher( None, old, new, autojunk = False ).get_opcodes()
+	oldn = [ re.sub( "[0-9]", "_", l ) for l in old ]
+	newn = [ re.sub( "[0-9]", "_", l ) for l in new ]
+	opcodes = difflib.SequenceMatcher( None, oldn, newn, autojunk = False ).get_opcodes()
 
 	nIns = 0
 	nDel = 0
@@ -50,7 +53,7 @@ def testUpdate( old, new ):
 	return (
 		max( nIns, nDel ),
 		insText,
-		"-%03d +%03d !%03d" % (nDel, nIns, nRep),
+		"-%03d +%03d" % (nDel + nRep, nIns + nRep),
 	)
 
 
