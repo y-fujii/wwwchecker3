@@ -2,6 +2,7 @@
 
 import re
 import io
+import unicodedata
 import html.parser
 import html.entities
 
@@ -54,6 +55,7 @@ class HTML2TextParser( html.parser.HTMLParser ):
 	
 	def nextLine( self ):
 		line = self.buf.getvalue()
+		line = unicodedata.normalize( "NFKC", line )
 		line = re.sub( "[ \t\r\n]+", " ", line )
 		line = line.strip()
 		self.buf = io.StringIO()
