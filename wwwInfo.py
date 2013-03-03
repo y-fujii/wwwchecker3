@@ -53,7 +53,7 @@ def testUpdate( old, new ):
 	return (
 		max( nIns, nDel ),
 		insText,
-		"-%03d +%03d" % (nDel + nRep, nIns + nRep),
+		"-%03d +%03d !%03d" % (nDel, nIns, nRep),
 	)
 
 
