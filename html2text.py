@@ -31,14 +31,14 @@ def unicodeAuto( src, encs = encodings ):
 class HTML2TextParser( html.parser.HTMLParser ):
 
 	# ref: http://www.w3.org/TR/html5/
-	tagsBlock = [
+	tagsBlock = frozenset( [
 		"html", "head", "title", "base", "link", "meta", "style", "script",
 		"noscript", "body", "article", "section", "nav", "aside", "h1", "h2",
 		"h3", "h4", "h5", "h6", "hgroup", "header", "footer", "address", "p",
 		"hr", "pre", "blockquote", "ol", "ul", "li", "dl", "dt", "dd",
 		"figure", "figcaption", "div", "table", "caption", "colgroup", "col",
 		"tbody", "thead", "tfoot", "tr", "br",
-	]
+	] )
 
 
 	def __init__( self ):
