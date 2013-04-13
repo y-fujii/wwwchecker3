@@ -6,6 +6,7 @@ import io
 import gzip
 import urllib.request
 import urllib.error
+import http.client
 from email import utils
 import time
 import difflib
@@ -122,11 +123,11 @@ def updateSafe( info, *args ):
 		return update( info, *args )
 	except urllib.error.HTTPError as err:
 		info.status = "Error: HTTP %d" % err.code
+	except http.client.HTTPException:
+		info.status = "Error: Protocol"
 	except OSError:
 		info.status = "Error: I/O"
 	except ValueError:
 		info.status = "Error: invalid URL"
-	except Exception:
-		info.status = "Error: unknown"
 
 	return False
