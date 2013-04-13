@@ -26,7 +26,6 @@ class UrlInfo( object ):
 
 
 def testUpdate( old, new ):
-	newN = [ tn for (tn, ta) in old ]
 	oldA = [ re.sub( "[0-9]+", "0", ta ) for (tn, ta) in old ]
 	newA = [ re.sub( "[0-9]+", "0", ta ) for (tn, ta) in new ]
 	opcodes = difflib.SequenceMatcher( None, oldA, newA, autojunk = False ).get_opcodes()
