@@ -82,7 +82,7 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 			date = time.time()
 
 		if "content-length" in f.info():
-			size = f.info()["content-length"]
+			size = int( f.info()["content-length"] )
 			if size == info.size:
 				info.status = "Content-length"
 				info.ratio = 0
@@ -94,6 +94,9 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 			html = gzip.GzipFile( fileobj = io.BytesIO( f.read() ) ).read()
 		else:
 			html = f.read()
+
+	if size < 0:
+		size = len( html )
 
 	(title, text) = html2Text( html )
 	(info.ratio, diff, info.status) = testUpdate( info.text, text )
