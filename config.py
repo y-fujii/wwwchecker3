@@ -5,7 +5,7 @@ import os
 
 timeOut = 30
 nParallel = 16
-infoFile = os.environ["HOME"] + "/.www-info-2.1"
+infoFile = os.environ["HOME"] + "/.www-info-2.2"
 listFile = os.environ["HOME"] + "/.www-list"
 htmlFile = os.environ["HOME"] + "/.www-check.html"
 
