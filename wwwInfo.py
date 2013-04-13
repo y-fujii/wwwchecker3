@@ -26,14 +26,14 @@ class UrlInfo( object ):
 
 
 def testUpdate( old, new ):
-	oldn = [ re.sub( "[0-9]+", "0", l ) for l in old ]
-	newn = [ re.sub( "[0-9]+", "0", l ) for l in new ]
-	opcodes = difflib.SequenceMatcher( None, oldn, newn, autojunk = False ).get_opcodes()
+	newN = [ tn for (tn, ta) in old ]
+	oldA = [ re.sub( "[0-9]+", "0", ta ) for (tn, ta) in old ]
+	newA = [ re.sub( "[0-9]+", "0", ta ) for (tn, ta) in new ]
+	opcodes = difflib.SequenceMatcher( None, oldA, newA, autojunk = False ).get_opcodes()
 
 	nIns = 0
 	nDel = 0
-	nRep = 0
-	insText = []
+	text = []
 	for (tag, i1, i2, j1, j2) in opcodes:
 		li = i2 - i1
 		lj = j2 - j1
@@ -41,19 +41,16 @@ def testUpdate( old, new ):
 			nDel += li
 		elif tag == "insert":
 			nIns += lj
-			insText += new[j1:j2]
+			text += [ tn for (tn, ta) in new[j1:j2] if ta != "" ]
 		elif tag == "replace":
-			if li == lj:
-				nRep += li
-			else:
-				nDel += li
-				nIns += lj
-				insText += new[j1:j2]
+			nDel += li
+			nIns += lj
+			text += [ tn for (tn, ta) in new[j1:j2] if ta != "" ]
 
 	return (
 		max( nIns, nDel ),
-		insText,
-		"-%03d +%03d !%03d" % (nDel, nIns, nRep),
+		text,
+		"-%04d +%04d" % (nDel, nIns),
 	)
 
 

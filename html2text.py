@@ -28,6 +28,12 @@ def unicodeAuto( src, encs = encodings ):
 	return str( src, bestEnc, "ignore" )
 
 
+def normalizeText( text ):
+	text = unicodedata.normalize( "NFKC", text )
+	text = re.sub( "[ \t\r\n]+", " ", text )
+	return text.strip()
+
+
 class HTML2TextParser( html.parser.HTMLParser ):
 
 	# ref: http://www.w3.org/TR/html5/
@@ -43,9 +49,11 @@ class HTML2TextParser( html.parser.HTMLParser ):
 
 	def __init__( self ):
 		html.parser.HTMLParser.__init__( self )
-		self.buf = io.StringIO()
+		self.bufN = io.StringIO()
+		self.bufA = io.StringIO()
 		self.text = []
 		self.title = ""
+		self.anchor = False
 	
 
 	def close( self ):
@@ -54,36 +62,42 @@ class HTML2TextParser( html.parser.HTMLParser ):
 
 	
 	def nextLine( self ):
-		line = self.buf.getvalue()
-		line = unicodedata.normalize( "NFKC", line )
-		line = re.sub( "[ \t\r\n]+", " ", line )
-		line = line.strip()
-		self.buf = io.StringIO()
-		return line
+		lineN = normalizeText( self.bufN.getvalue() )
+		lineA = normalizeText( self.bufA.getvalue() )
+		self.bufN = io.StringIO()
+		self.bufA = io.StringIO()
+		self.anchor = False
+		return (lineN, lineA)
 
 
 	def pushLine( self ):
-		line = self.nextLine()
-		if line != "":
-			self.text.append( line )
+		(lineN, lineA) = self.nextLine()
+		if lineN != "":
+			self.text.append( (lineN, lineA) )
 
 
 	def handle_starttag( self, tag, _ ):
-		if tag in self.tagsBlock:
+		if tag == "a":
+			self.anchor = True
+		elif tag in self.tagsBlock:
 			self.pushLine()
 	
 
 	def handle_endtag( self, tag ):
-		if tag in [ "script", "style" ]:
-			self.nextLine()
+		if tag == "a":
+			self.anchor = False
 		elif tag == "title":
-			self.title = self.nextLine()
+			(self.title, _) = self.nextLine()
+		elif tag in [ "script", "style" ]:
+			self.nextLine()
 		elif tag in self.tagsBlock:
 			self.pushLine()
 
 
 	def handle_data( self, data ):
-		self.buf.write( data )
+		self.bufN.write( data )
+		if not self.anchor:
+			self.bufA.write( data )
 	
 
 	def handle_entityref( self, name ):
@@ -91,14 +105,14 @@ class HTML2TextParser( html.parser.HTMLParser ):
 			c = chr( html.entities.name2codepoint[name] )
 		except KeyError:
 			c = " %s " % name
-		self.buf.write( c )
+		self.handle_data( c )
 
 	def handle_charref( self, name ):
 		if name.startswith( "x" ):
 			n = int( name[1:], 16 )
 		else:
 			n = int( name )
-		self.buf.write( chr( n ) )
+		self.handle_data( chr( n ) )
 
 
 def html2Text( html ):
