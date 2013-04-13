@@ -42,6 +42,8 @@ def testUpdate( old, new ):
 			nIns += lj
 			text += [ tn for (tn, ta) in new[j1:j2] if ta != "" ]
 		elif tag == "replace":
+			if li == 1 and lj == 1:
+				continue
 			nDel += li
 			nIns += lj
 			text += [ tn for (tn, ta) in new[j1:j2] if ta != "" ]
@@ -124,5 +126,7 @@ def updateSafe( info, *args ):
 		info.status = "Error: I/O"
 	except ValueError:
 		info.status = "Error: invalid URL"
+	except Exception:
+		info.status = "Error: unknown"
 
 	return False
