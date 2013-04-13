@@ -54,6 +54,7 @@ class HTML2TextParser( html.parser.HTMLParser ):
 		self.text = []
 		self.title = ""
 		self.anchor = False
+		self.head   = False
 	
 
 	def close( self ):
@@ -67,6 +68,7 @@ class HTML2TextParser( html.parser.HTMLParser ):
 		self.bufN = io.StringIO()
 		self.bufA = io.StringIO()
 		self.anchor = False
+		self.head   = False
 		return (lineN, lineA)
 
 
@@ -79,6 +81,8 @@ class HTML2TextParser( html.parser.HTMLParser ):
 	def handle_starttag( self, tag, _ ):
 		if tag == "a":
 			self.anchor = True
+		elif re.match( "h[1-6]", tag ):
+			self.head = True
 		elif tag in self.tagsBlock:
 			self.pushLine()
 	
@@ -96,7 +100,7 @@ class HTML2TextParser( html.parser.HTMLParser ):
 
 	def handle_data( self, data ):
 		self.bufN.write( data )
-		if not self.anchor:
+		if not self.anchor or self.head:
 			self.bufA.write( data )
 	
 
