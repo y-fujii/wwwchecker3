@@ -41,13 +41,13 @@ def testUpdate( old, new ):
 			nDel += li
 		elif tag == "insert":
 			nIns += lj
-			text += [ tn for (tn, ta) in new[j1:j2] if ta != "" ]
+			text.extend( tn for (tn, ta) in new[j1:j2] if ta != "" )
 		elif tag == "replace":
-			if li == 1 and lj == 1:
+			if li == lj and li < 2:
 				continue
 			nDel += li
 			nIns += lj
-			text += [ tn for (tn, ta) in new[j1:j2] if ta != "" ]
+			text.extend( tn for (tn, ta) in new[j1:j2] if ta != "" )
 
 	return (
 		max( nIns, nDel ),
