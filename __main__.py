@@ -112,7 +112,7 @@ def main():
 	with open( config.htmlFile, "w" ) as f:
 		renderHtml( f, newInfos, config )
 
-	webbrowser.open( config.htmlFile )
+	webbrowser.open_new_tab( config.htmlFile )
 
 
 if __name__ == "__main__":
