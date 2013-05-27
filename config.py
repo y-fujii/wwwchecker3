@@ -9,7 +9,7 @@ infoFile = os.environ["HOME"] + "/.www-info-2.2"
 listFile = os.environ["HOME"] + "/.www-list"
 htmlFile = os.environ["HOME"] + "/.www-check.html"
 
-maxRatio = 8
+maxRatio = 4
 maxLine = 4
 fgColor =  ( (127, 127, 127), (127, 127, 127), (  0,   0,   0) )
 bgColor =  ( (243, 247, 247), (247, 245, 239), (240, 236, 224) )
