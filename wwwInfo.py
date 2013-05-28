@@ -135,6 +135,8 @@ def updateSafe( info, *args ):
 		info.status = "Error: Protocol"
 	except OSError:
 		info.status = "Error: I/O"
+	except EOFError:
+		info.status = "Error: EOF"
 	except ValueError:
 		info.status = "Error: invalid URL"
 
