@@ -28,21 +28,18 @@ class UrlInfo( object ):
 
 
 def testUpdate( old, new ):
-	size = len( old ) + len( new )
-	if size == 0:
-		return (0, [], "-0000 +0000")
-	lls = [ math.log( len( tn ) ) for (tn, ta) in old + new ]
-	rts = [ len( ta ) / len( tn ) for (tn, ta) in old + new ]
-	lavg = sum( lls ) / size
-	ravg = sum( rts ) / size
-	# XXX: / (N - 1)
-	lsgm = math.sqrt( sum( l * l for l in lls ) / size - lavg * lavg )
-	rsgm = math.sqrt( sum( r * r for r in rts ) / size - ravg * ravg )
+	ars = [ len( ta ) / len( tn ) for (tn, ta) in old + new ] + [ 0.0, 1.0 ]
+	lls = [ math.log( len( tn ) ) for (tn, ta) in old + new ] + [ 0.0, 7.0 ]
+	aavg = sum( ars ) / len( ars )
+	lavg = sum( lls ) / len( lls )
+	aisd = math.sqrt( (len( ars ) - 1) / sum( (v - aavg) * (v - aavg) for v in ars ) )
+	lisd = math.sqrt( (len( lls ) - 1) / sum( (v - lavg) * (v - lavg) for v in lls ) )
 
 	def calcScore( tn, ta ):
-		llen = math.log( len( tn ) )
-		rate = len( ta ) / len( tn )
-		return (rate - ravg) / (rsgm + 1e-8) + (llen - lavg) / (lsgm + 1e-8)
+		assert tn != ""
+		ll = math.log( len( tn ) )
+		ar = len( ta ) / len( tn )
+		return (ar - aavg) * aisd + (ll - lavg) * lisd
 
 	oldA = [ re.sub( "[0-9]+", "0", ta ) for (tn, ta) in old ]
 	newA = [ re.sub( "[0-9]+", "0", ta ) for (tn, ta) in new ]
