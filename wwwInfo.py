@@ -28,6 +28,8 @@ class UrlInfo( object ):
 
 
 def testUpdate( old, new ):
+	old = [ (tn, re.sub( "[0-9]+", "0", ta )) for (tn, ta) in old ]
+	new = [ (tn, re.sub( "[0-9]+", "0", ta )) for (tn, ta) in new ]
 	ars = [ len( ta ) / len( tn ) for (tn, ta) in old + new ] + [ 0.0, 1.0 ]
 	lls = [ math.log( len( tn ) ) for (tn, ta) in old + new ] + [ 0.0, 6.0 ]
 	aavg = sum( ars ) / len( ars )
@@ -41,8 +43,8 @@ def testUpdate( old, new ):
 		ar = len( ta ) / len( tn )
 		return (ar - aavg) * aisd + (ll - lavg) * lisd
 
-	oldA = [ re.sub( "[0-9]+", "0", ta ) for (tn, ta) in old ]
-	newA = [ re.sub( "[0-9]+", "0", ta ) for (tn, ta) in new ]
+	oldA = [ ta for (tn, ta) in old ]
+	newA = [ ta for (tn, ta) in new ]
 	opcodes = difflib.SequenceMatcher( None, oldA, newA, autojunk = False ).get_opcodes()
 
 	nIns = 0
