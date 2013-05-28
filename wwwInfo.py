@@ -29,7 +29,7 @@ class UrlInfo( object ):
 
 def testUpdate( old, new ):
 	ars = [ len( ta ) / len( tn ) for (tn, ta) in old + new ] + [ 0.0, 1.0 ]
-	lls = [ math.log( len( tn ) ) for (tn, ta) in old + new ] + [ 0.0, 7.0 ]
+	lls = [ math.log( len( tn ) ) for (tn, ta) in old + new ] + [ 0.0, 6.0 ]
 	aavg = sum( ars ) / len( ars )
 	lavg = sum( lls ) / len( lls )
 	aisd = math.sqrt( (len( ars ) - 1) / sum( (v - aavg) * (v - aavg) for v in ars ) )
