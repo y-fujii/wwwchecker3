@@ -39,7 +39,7 @@ def testUpdate( old, new ):
 		assert tn != ""
 		ll = math.log( len( tn ) )
 		ar = len( ta ) / len( tn )
-		return (ar - aavg) * aisd + (ll - lavg) * lisd
+		return (ar - aavg) * aisd + (ll - lavg) * lisd * 2.0
 
 	oldTx = [ re.sub( r"[0-9]+", "0", tn ) for (tn, ta) in old ]
 	newTx = [ re.sub( r"[0-9]+", "0", tn ) for (tn, ta) in new ]
