@@ -28,8 +28,6 @@ class UrlInfo( object ):
 
 
 def testUpdate( old, new ):
-	old = [ (tn, re.sub( "[0-9]+", "0", ta )) for (tn, ta) in old ]
-	new = [ (tn, re.sub( "[0-9]+", "0", ta )) for (tn, ta) in new ]
 	ars = [ len( ta ) / len( tn ) for (tn, ta) in old + new ] + [ 0.0, 1.0 ]
 	lls = [ math.log( len( tn ) ) for (tn, ta) in old + new ] + [ 0.0, 6.0 ]
 	aavg = sum( ars ) / len( ars )
@@ -43,14 +41,16 @@ def testUpdate( old, new ):
 		ar = len( ta ) / len( tn )
 		return (ar - aavg) * aisd + (ll - lavg) * lisd
 
-	oldA = [ ta for (tn, ta) in old ]
-	newA = [ ta for (tn, ta) in new ]
-	opcodes = difflib.SequenceMatcher( None, oldA, newA, autojunk = False ).get_opcodes()
+	oldTx = [ re.sub( r"[0-9]+", "0", tn ) for (tn, ta) in old ]
+	newTx = [ re.sub( r"[0-9]+", "0", tn ) for (tn, ta) in new ]
+	opcodes = difflib.SequenceMatcher( None, oldTx, newTx, autojunk = False ).get_opcodes()
 
 	nIns = 0
 	nDel = 0
 	text = []
 	for (tag, i1, i2, j1, j2) in opcodes:
+		if tag == "replace" and i2 - i1 == 1 and j2 - j1 == 1:
+			continue
 		if tag in ["delete", "replace"]:
 			if any( calcScore( tn, ta ) >= 0.0 for (tn, ta) in old[i1:i2] ):
 				nDel += i2 - i1
