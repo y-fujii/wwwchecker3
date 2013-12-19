@@ -57,7 +57,7 @@ def testUpdate( old, new ):
 		if tag in ["insert", "replace"]:
 			if any( calcScore( tn, ta ) >= 0.0 for (tn, ta) in new[j1:j2] ):
 				nIns += j2 - j1
-				text.extend( tn for (tn, ta) in new[j1:j2] if ta != "" )
+				text.extend( tn for (tn, ta) in new[j1:j2] )
 
 	return (
 		max( nIns, nDel ),
