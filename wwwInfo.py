@@ -70,7 +70,7 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 	req = urllib.request.Request( info.url, headers = {
 		"if-modified-since": utils.formatdate( info.date ),
 		"accept-encoding": "gzip",
-		"user-agent": "Mozilla/5.0",
+		"user-agent": "Mozilla/5.0 (+http://mimosa-pudica.net/www-checker.html)",
 	} )
 	try:
 		f = urllib.request.urlopen( req )
