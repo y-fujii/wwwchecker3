@@ -5,6 +5,7 @@ import contextlib
 import re
 import io
 import gzip
+import zlib
 import urllib.request
 import urllib.error
 import http.client
@@ -25,6 +26,7 @@ class UrlInfo( object ):
 		self.status = ""
 		self.diff = []
 		self.title = url
+		self.etag = None
 
 
 def testUpdate( old, new ):
@@ -67,22 +69,33 @@ def testUpdate( old, new ):
 
 
 def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
-	req = urllib.request.Request( info.url, headers = {
-		"if-modified-since": utils.formatdate( info.date ),
-		"accept-encoding": "gzip",
+	headers = {
+		"accept-encoding": "gzip, deflate",
 		"user-agent": "Mozilla/5.0 (+http://mimosa-pudica.net/www-checker.html)",
-	} )
+	}
+	if info.etag is None:
+		headers["if-modified-since"] = utils.formatdate( info.date )
+	else:
+		headers["if-none-match"] = info.etag
+
 	try:
-		f = urllib.request.urlopen( req )
+		f = urllib.request.urlopen(
+			urllib.request.Request( info.url, headers = headers )
+		)
 	except urllib.error.HTTPError as err:
 		if err.code == 304:
-			info.status = "If-modified-since"
+			if info.etag is None:
+				info.status = "If-modified-since"
+			else:
+				info.status = "If-none-match"
 			info.ratio = 0
 			return False
 		else:
 			raise
 
 	with contextlib.closing( f ):
+		info.etag = f.info().get( "etag", None )
+
 		if "last-modified" in f.info():
 			date = utils.mktime_tz(
 				utils.parsedate_tz( f.info()["last-modified"] )
@@ -103,10 +116,14 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 		else:
 			size = -1
 
-		if f.info().get( "content-encoding", "" ) == "gzip":
-			html = gzip.GzipFile( fileobj = io.BytesIO( f.read() ) ).read()
+		data = f.read()
+		cenc = f.info().get( "content-encoding", "" )
+		if cenc == "gzip":
+			html = gzip.GzipFile( fileobj = io.BytesIO( data ) ).read()
+		elif cenc == "deflate":
+			html = zlib.decompress( data )
 		else:
-			html = f.read()
+			html = data
 
 	if size < 0:
 		size = len( html )
