@@ -16,7 +16,7 @@ class UrlInfo( object ):
 		self.url = url
 		self.text = []
 		self.date = 0
-		self.size = -1
+		self.size = 0
 		self.ratio = 0
 		self.status = ""
 		self.diff = []
