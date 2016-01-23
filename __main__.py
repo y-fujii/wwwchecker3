@@ -8,6 +8,7 @@ import time
 import pickle
 import random
 import webbrowser
+import urllib3
 import parallel
 import wwwInfo
 import config
@@ -77,13 +78,14 @@ def main():
 	newInfos = [ f( url ) for url in urls ]
 	random.shuffle( newInfos )
 
-	socket.setdefaulttimeout( config.timeOut )
+	urllib3.disable_warnings()
+	http = urllib3.PoolManager( 16, timeout = config.timeOut )
 
 	lock = threading.Lock()
 	times = []
 	def update( info ):
 		bgnTime = time.time()
-		wwwInfo.updateSafe( info )
+		wwwInfo.update( info, http )
 		endTime = time.time()
 		with lock:
 			times.append( endTime - bgnTime )

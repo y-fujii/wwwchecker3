@@ -3,16 +3,11 @@
 import math
 import contextlib
 import re
-import io
-import gzip
-import zlib
-import urllib.request
-import urllib.error
-import http.client
 from email import utils
 import time
 import difflib
 import html2text
+import urllib3
 
 
 class UrlInfo( object ):
@@ -68,7 +63,7 @@ def testUpdate( old, new ):
 	)
 
 
-def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
+def update( info, http, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 	headers = {
 		"accept-encoding": "gzip, deflate",
 		"user-agent": "Mozilla/5.0 (+http://mimosa-pudica.net/www-checker.html)",
@@ -78,52 +73,64 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 	else:
 		headers["if-none-match"] = info.etag
 
+	dateNow = time.time()
 	try:
-		f = urllib.request.urlopen(
-			urllib.request.Request( info.url, headers = headers )
-		)
-	except urllib.error.HTTPError as err:
-		if err.code == 304:
+		f = http.request( "GET", info.url, headers = headers, preload_content = False )
+	except KeyError:
+		info.status = "Invalid URL"
+		info.ratio = 0
+		return False
+	except urllib3.exceptions.HTTPError:
+		info.status = "Error"
+		info.ratio = 0
+		return False
+
+	with contextlib.closing( f ):
+		if f.status == 304:
 			if info.etag is None:
 				info.status = "If-modified-since"
 			else:
 				info.status = "If-none-match"
 			info.ratio = 0
 			return False
-		else:
-			raise
+		elif f.status != 200:
+			info.status = "HTTP %d" % f.status
+			info.ratio = 0
+			return False
 
-	with contextlib.closing( f ):
-		info.etag = f.info().get( "etag", None )
+		info.etag = f.headers.get( "etag", None )
 
-		if "last-modified" in f.info():
-			date = utils.mktime_tz(
-				utils.parsedate_tz( f.info()["last-modified"] )
-			)
+		if "last-modified" in f.headers:
+			try:
+				date = utils.mktime_tz(
+					utils.parsedate_tz( f.headers["last-modified"] )
+				)
+			except ValueError:
+				date = dateNow
+
 			if date == info.date:
 				info.status = "Last-modified"
 				info.ratio = 0
 				return False
 		else:
-			date = time.time()
+			date = dateNow
 
-		if "content-length" in f.info():
-			size = int( f.info()["content-length"] )
-			if size == info.size:
-				info.status = "Content-length"
-				info.ratio = 0
-				return False
-		else:
+		try:
+			size = int( f.headers.get( "content-length", "-1" ) )
+		except ValueError:
 			size = -1
 
-		data = f.read()
-		cenc = f.info().get( "content-encoding", "" )
-		if cenc == "gzip":
-			html = gzip.GzipFile( fileobj = io.BytesIO( data ) ).read()
-		elif cenc == "deflate":
-			html = zlib.decompress( data )
-		else:
-			html = data
+		if size == info.size:
+			info.status = "Content-length"
+			info.ratio = 0
+			return False
+
+		try:
+			html = f.read( decode_content = True )
+		except urllib3.exceptions.HTTPError:
+			info.status = "Error"
+			info.ratio = 0
+			return False
 
 	if size < 0:
 		size = len( html )
@@ -143,21 +150,3 @@ def update( info, testUpdate = testUpdate, html2Text = html2text.html2Text ):
 		return True
 	else:
 		return False
-
-
-def updateSafe( info, *args ):
-	try:
-		info.ratio = 0
-		return update( info, *args )
-	except urllib.error.HTTPError as err:
-		info.status = "Error: HTTP %d" % err.code
-	except http.client.HTTPException:
-		info.status = "Error: Protocol"
-	except OSError:
-		info.status = "Error: I/O"
-	except EOFError:
-		info.status = "Error: EOF"
-	except ValueError:
-		info.status = "Error: invalid URL"
-
-	return False
