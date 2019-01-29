@@ -3,7 +3,7 @@
 import sys
 import socket
 import threading
-import cgi
+import html
 import time
 import pickle
 import random
@@ -39,7 +39,7 @@ def renderHtml( out, infos, config ):
 			return '#%02x%02x%02x' % (rr, gg, bb)
 
 		tm = time.localtime( info.date )
-		summary = "<br />\n".join( cgi.escape( l ) for l in info.diff[:config.maxLine] )
+		summary = "<br />\n".join( html.escape( l ) for l in info.diff[:config.maxLine] )
 		out.write(
 			config.htmlContent % {
 				"fgColor": color( *config.fgColor ),
@@ -50,9 +50,9 @@ def renderHtml( out, infos, config ):
 				"dd": tm[2],
 				"hh": tm[3],
 				"mi": tm[4],
-				"status": cgi.escape( info.status ),
-				"url": cgi.escape( info.url ),
-				"title": cgi.escape( info.title ),
+				"status": html.escape( info.status ),
+				"url": html.escape( info.url ),
+				"title": html.escape( info.title ),
 				"summary": summary,
 			}
 		)
