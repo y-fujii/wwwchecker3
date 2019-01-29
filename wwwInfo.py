@@ -1,5 +1,7 @@
 # by Yasuhiro Fujii <y-fujii at mimosa-pudica.net>, public domain
 
+import itertools
+import collections
 import math
 import contextlib
 import re
@@ -38,9 +40,13 @@ def testUpdate( old, new ):
 		ar = len( ta ) / len( tn )
 		return (ar - aavg) * aisd + (ll - lavg) * lisd
 
-	oldTx = [ re.sub( r"[0-9]+", "0", tn ) for (tn, ta) in old ]
-	newTx = [ re.sub( r"[0-9]+", "0", tn ) for (tn, ta) in new ]
+	oldTx = [ re.sub( r"[0-9][0-9,]*(\.[0-9]+)?", "0", tn ) for (tn, ta) in old ]
+	newTx = [ re.sub( r"[0-9][0-9,]*(\.[0-9]+)?", "0", tn ) for (tn, ta) in new ]
 	opcodes = difflib.SequenceMatcher( None, oldTx, newTx, autojunk = False ).get_opcodes()
+
+	counter = collections.defaultdict( int )
+	for tx in itertools.chain( oldTx, newTx ):
+		counter[tx] += 1
 
 	nIns = 0
 	nDel = 0
@@ -49,12 +55,14 @@ def testUpdate( old, new ):
 		if tag == "replace" and i2 - i1 == 1 and j2 - j1 == 1:
 			continue
 		if tag in ["delete", "replace"]:
-			if any( calcScore( tn, ta ) >= 0.0 for (tn, ta) in old[i1:i2] ):
-				nDel += i2 - i1
+			tmp = [ old[i] for i in range( i1, i2 ) if counter[oldTx[i]] == 1 ]
+			if any( calcScore( tn, ta ) >= 0.0 for (tn, ta) in tmp ):
+				nDel += len( tmp )
 		if tag in ["insert", "replace"]:
-			if any( calcScore( tn, ta ) >= 0.0 for (tn, ta) in new[j1:j2] ):
-				nIns += j2 - j1
-				text.extend( tn for (tn, ta) in new[j1:j2] )
+			tmp = [ new[i] for i in range( j1, j2 ) if counter[newTx[i]] == 1 ]
+			if any( calcScore( tn, ta ) >= 0.0 for (tn, ta) in tmp ):
+				nIns += len( tmp )
+				text.extend( tn for (tn, ta) in tmp )
 
 	return (
 		max( nIns, nDel ),
