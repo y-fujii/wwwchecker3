@@ -27,8 +27,8 @@ class UrlInfo( object ):
 
 
 def testUpdate( old, new ):
-	ars = [ len( ta ) / len( tn ) for (tn, ta) in old + new ] + [ 0.0, 1.0 ]
-	lls = [ math.log( len( tn ) ) for (tn, ta) in old + new ] + [ 0.0, 6.0 ]
+	ars = [ len( ta ) / len( tn ) for (tn, ta) in itertools.chain( old, new ) ] + [ 0.0, 1.0 ]
+	lls = [ math.log( len( tn ) ) for (tn, ta) in itertools.chain( old, new ) ] + [ 0.0, 6.0 ]
 	aavg = sum( ars ) / len( ars )
 	lavg = sum( lls ) / len( lls )
 	aisd = math.sqrt( (len( ars ) - 1) / sum( (v - aavg) * (v - aavg) for v in ars ) )
@@ -40,8 +40,9 @@ def testUpdate( old, new ):
 		ar = len( ta ) / len( tn )
 		return (ar - aavg) * aisd + (ll - lavg) * lisd
 
-	oldTx = [ re.sub( r"[0-9][0-9,]*(\.[0-9]+)?", "0", tn ) for (tn, ta) in old ]
-	newTx = [ re.sub( r"[0-9][0-9,]*(\.[0-9]+)?", "0", tn ) for (tn, ta) in new ]
+	reNumber = re.compile( r"[0-9][0-9,]*(\.[0-9]+)?" )
+	oldTx = [ reNumber.sub( "0", tn ) for (tn, ta) in old ]
+	newTx = [ reNumber.sub( "0", tn ) for (tn, ta) in new ]
 	opcodes = difflib.SequenceMatcher( None, oldTx, newTx, autojunk = False ).get_opcodes()
 
 	counter = collections.defaultdict( int )
