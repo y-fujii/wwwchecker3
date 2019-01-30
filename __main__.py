@@ -79,7 +79,7 @@ def main():
 	random.shuffle( newInfos )
 
 	urllib3.disable_warnings()
-	http = urllib3.PoolManager( 16, timeout = config.timeOut )
+	http = urllib3.PoolManager( config.nParallel, timeout = config.timeOut )
 
 	lock = threading.Lock()
 	times = []

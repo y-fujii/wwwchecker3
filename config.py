@@ -23,32 +23,43 @@ htmlHeader = """\
 		<title>wwwChecker</title>
 		<style type="text/css">
 			* {
-				font: 100%/1.5 sans-serif;
+				font: 100%/1.6 sans-serif;
 				margin:  0;
 				padding: 0;
 				text-decoration: none;
 			}
 
-			table {
-				width: 95%;
-				margin-left:  auto;
-				margin-right: auto;
-				table-layout: fixed;
-				border-spacing: 0.5em;
+			body {
+			    margin: 1em 0;
 			}
 
-			td.status {
-				font-family: Inconsolata, monospace;
-				width: 18em;
+			table {
+				width: 95%;
+				margin: 0 auto;
+				table-layout: fixed;
+				border-spacing: 0.6em;
+			}
+
+			td:nth-child(1), td:nth-child(2) {
+				font-family: monospace, monospace;
+				white-space: nowrap;
 				vertical-align: top;
+				text-align: center;
+			}
+
+			td:nth-child(1) {
+				width: 8.0em;
+			}
+
+			td:nth-child(2) {
+				width: 8.5em;
 			}
 
 			div {
-				max-height: 6em;
-				margin:  0.25em 0.0em;
-				padding: 0.25em 0.5em;
+				max-height: 6.4em;
+				margin:  0.30em 0.0em;
+				padding: 0.30em 0.6em;
 				overflow: hidden;
-				border-radius: 0.5em;
 			}
 
 			a:hover {
@@ -63,8 +74,9 @@ htmlHeader = """\
 
 htmlContent = """
 <tr style="color: %(fgColor)s">
-<td class="status">%(yyyy)04d-%(mo)02d-%(dd)02d&nbsp;%(hh)02d:%(mi)02d&nbsp;&nbsp;%(status)s</td>
-<td class="text">
+<td>%(yyyy)04d-%(mo)02d-%(dd)02d %(hh)02d:%(mi)02d</td>
+<td>%(status)s</td>
+<td>
 <a href="%(url)s" style="color: %(uriColor)s">%(title)s</a>
 <div style="background-color: %(bgColor)s">
 %(summary)s
