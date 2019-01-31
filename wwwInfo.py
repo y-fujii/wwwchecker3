@@ -94,7 +94,7 @@ def update( info, http, testUpdate = testUpdate, html2Text = html2text.html2Text
 		info.ratio = 0
 		return False
 
-	with contextlib.closing( f ):
+	try:
 		if f.status == 304:
 			if info.etag is None:
 				info.status = "If-modified-since"
@@ -140,6 +140,8 @@ def update( info, http, testUpdate = testUpdate, html2Text = html2text.html2Text
 			info.status = "Error"
 			info.ratio = 0
 			return False
+	finally:
+		f.release_conn()
 
 	if size < 0:
 		size = len( html )
