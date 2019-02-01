@@ -14,16 +14,6 @@ import wwwInfo
 import config
 
 
-def median( xs ):
-	n = len( xs )
-	ys = sorted( xs )
-	assert n > 0
-	if n % 2 == 0:
-		return (ys[n // 2 - 1] + ys[n // 2]) / 2.0
-	else:
-		return ys[n // 2]
-
-
 def renderHtml( out, infos, config ):
 	out.write( config.htmlHeader )
 	for info in infos:
@@ -82,15 +72,21 @@ def main():
 	http = urllib3.PoolManager( config.nParallel, timeout = config.timeOut )
 
 	lock = threading.Lock()
+	count = 0
 	times = []
 	def update( info ):
+		nonlocal count
 		bgnTime = time.time()
 		wwwInfo.update( info, http )
 		endTime = time.time()
 		with lock:
+			count += 1
 			times.append( endTime - bgnTime )
-			sys.stdout.write( "\r\x1b[K" + info.url )
-			sys.stdout.flush()
+			sys.stdout.write(
+				f"{count:5} / {len( newInfos )} | "
+				f"{1000.0 * (endTime - bgnTime):5.0f} [ms] | "
+				f"{info.url}\n"
+			)
 
 	runner = parallel.Runner(
 		[ lambda i = i: update( i ) for i in newInfos ],
@@ -102,10 +98,13 @@ def main():
 		runner.abort()
 		raise
 
+	times.sort()
+	q1 = 1000.0 * times[round( 0.25 * len( times ) )]
+	q2 = 1000.0 * times[round( 0.50 * len( times ) )]
+	q3 = 1000.0 * times[round( 0.75 * len( times ) )]
 	sys.stdout.write(
-		"\r\x1b[KMd = %.0fms\n" % (median( times ) * 1000.0)
+		f"Q1 = {q1:.0f}, Q2 = {q2:.0f}, Q3 = {q3:.0f} [ms].\n"
 	)
-	sys.stdout.flush()
 
 	newInfos.sort( key = lambda x: -x.date )
 	with open( config.infoFile, "wb" ) as f:
