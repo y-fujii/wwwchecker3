@@ -1,9 +1,6 @@
-SRCS = __main__.py config.py html2text.py parallel.py wwwInfo.py
-
-wwwchecker: $(SRCS) makefile
+wwwchecker: $(wildcard src/*) makefile
 	rm -rf build && \
-	mkdir build && \
-	cp $(SRCS) build && \
+	cp -r src build && \
 	cd build && \
 	git clone --depth 1 -b release https://github.com/urllib3/urllib3/ urllib3-git && \
 	mv urllib3-git/src/urllib3 . && \
