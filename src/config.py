@@ -57,8 +57,8 @@ htmlHeader = """\
 
 			div {
 				max-height: 6.4em;
-				margin:  0.30em 0.0em;
-				padding: 0.30em 0.6em;
+				margin:  0.3em 0.0em;
+				padding: 0.3em 0.6em;
 				overflow: hidden;
 			}
 
@@ -67,8 +67,7 @@ htmlHeader = """\
 			}
 		</style>
 	</head>
-	<body>
-
+<body>
 <table>
 """
 
@@ -85,7 +84,7 @@ htmlContent = """
 </tr>
 """
 
-htmlFooter = """
+htmlFooter = """\
 </table>
 </body>
 </html>
