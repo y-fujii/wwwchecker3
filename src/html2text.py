@@ -83,7 +83,7 @@ class HTML2TextParser( html.parser.HTMLParser ):
 			self.anchor = True
 		elif re.match( "h[1-6]", tag ):
 			self.head = True
-		elif tag in self.tagsBlock:
+		if tag in self.tagsBlock:
 			self.pushLine()
 	
 
