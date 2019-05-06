@@ -81,10 +81,10 @@ class HTML2TextParser( html.parser.HTMLParser ):
 	def handle_starttag( self, tag, _ ):
 		if tag == "a":
 			self.anchor = True
-		elif re.match( "h[1-6]", tag ):
-			self.head = True
-		if tag in self.tagsBlock:
+		elif tag in self.tagsBlock:
 			self.pushLine()
+		if re.match( "h[1-6]", tag ):
+			self.head = True
 	
 
 	def handle_endtag( self, tag ):
